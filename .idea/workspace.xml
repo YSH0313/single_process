@@ -1,0 +1,1106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="e961fdc0-7f36-43ce-8bec-a064046bdaf2" name="Default Changelist" comment="" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/spider/beizhixing.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="159">
+              <caret line="66" column="20" selection-start-line="66" selection-start-column="8" selection-end-line="66" selection-end-column="20" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/spider/ningxia.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="448">
+              <caret line="217" column="29" selection-start-line="217" selection-start-column="29" selection-end-line="217" selection-end-column="29" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/spider/beizhixing_add.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="150">
+              <caret line="6" column="6" selection-start-line="6" selection-start-column="6" selection-end-line="6" selection-end-column="6" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/spider/beizhixing_new_api.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="246">
+              <caret line="59" column="26" selection-start-line="59" selection-start-column="26" selection-end-line="59" selection-end-column="26" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/asyncio_config/manager.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="367">
+              <caret line="260" column="26" lean-forward="true" selection-start-line="260" selection-start-column="26" selection-end-line="260" selection-end-column="26" />
+              <folding>
+                <element signature="e#24#33#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/config/settings.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="71">
+              <caret line="64" column="1" selection-start-line="60" selection-start-column="12" selection-end-line="64" selection-end-column="1" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JavaScript File" />
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>model</find>
+      <find>true</find>
+      <find>:</find>
+      <find>请求成功</find>
+      <find>请求成功 True</find>
+      <find>shenpan_z</find>
+      <find>total</find>
+      <find>title_id</find>
+      <find>self.header</find>
+      <find>self.deal</find>
+      <find>self_re</find>
+      <find>由于</find>
+      <find>正在重回队列</find>
+      <find>get_contents</find>
+      <find>charset</find>
+      <find>content</find>
+      <find>1页</find>
+      <find>成功</find>
+      <find>不公开</find>
+      <find>caseType</find>
+      <find>a1b99f19d140fc494dc8280790df4686</find>
+      <find>\u5e7f\u5dde\u80fd\u805a\u73af\u4fdd\u8282\u80fd\u79d1\u6280\u6709\u9650\u516c\u53f8</find>
+      <find>175.155.90.27</find>
+      <find>180.125.238.62</find>
+      <find>183.92.247.27</find>
+      <find>广州颂拓专用设备有限公司</find>
+      <find>42.5.7.121</find>
+      <find>广德县柏垫镇张复村红发竹木加工厂</find>
+      <find>广西万宝交通能源投资开发有限公司</find>
+      <find>self.host</find>
+    </findStrings>
+    <replaceStrings>
+      <replace />
+    </replaceStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/spider/shixin_susong.py" />
+        <option value="$PROJECT_DIR$/do_work.py" />
+        <option value="$PROJECT_DIR$/Listener/start_process.py" />
+        <option value="$PROJECT_DIR$/Listener/stop_work.py" />
+        <option value="$PROJECT_DIR$/Listener/Listener_runer.py" />
+        <option value="$PROJECT_DIR$/spider/update_caipan.py" />
+        <option value="$PROJECT_DIR$/spider/end_case.py" />
+        <option value="$PROJECT_DIR$/items.py" />
+        <option value="$PROJECT_DIR$/spider/update_zbaj.py" />
+        <option value="$PROJECT_DIR$/bei/shixin_limit.py" />
+        <option value="$PROJECT_DIR$/config/proxys.py" />
+        <option value="$PROJECT_DIR$/spider/shixin_limit_pages.py" />
+        <option value="$PROJECT_DIR$/spider/shanghai.py" />
+        <option value="$PROJECT_DIR$/spider/update_xgl.py" />
+        <option value="$PROJECT_DIR$/bei/jilin.py" />
+        <option value="$PROJECT_DIR$/spider/update_bgt.py" />
+        <option value="$PROJECT_DIR$/spider/update_ktgg_xd.py" />
+        <option value="$PROJECT_DIR$/spider/jilin.py" />
+        <option value="$PROJECT_DIR$/config/all_config.py" />
+        <option value="$PROJECT_DIR$/spider/creat_project.py" />
+        <option value="$PROJECT_DIR$/run_update.sh" />
+        <option value="$PROJECT_DIR$/spider/add_beizhixing_source.py" />
+        <option value="$PROJECT_DIR$/spider/tests.py" />
+        <option value="$PROJECT_DIR$/spider/add_ktgg_source.py" />
+        <option value="$PROJECT_DIR$/beizhixing_api.sh" />
+        <option value="$PROJECT_DIR$/spider/update_shixin.py" />
+        <option value="$PROJECT_DIR$/asyncio_config/my_Requests.py" />
+        <option value="$PROJECT_DIR$/spider/import_tables.py" />
+        <option value="$PROJECT_DIR$/spider/update_beizhixing.py" />
+        <option value="$PROJECT_DIR$/spider/beizhixing_null_pname.py" />
+        <option value="$PROJECT_DIR$/spider/beizhixing_api.py" />
+        <option value="$PROJECT_DIR$/spider/shixin_beizhi.py" />
+        <option value="$PROJECT_DIR$/spider/shixin_limit.py" />
+        <option value="$PROJECT_DIR$/spider/beizhixing_update.py" />
+        <option value="$PROJECT_DIR$/asyncio_config/th_read.py" />
+        <option value="$PROJECT_DIR$/config/data_deal.py" />
+        <option value="$PROJECT_DIR$/spider/beizhixing.py" />
+        <option value="$PROJECT_DIR$/spider/update_ktgg.py" />
+        <option value="$PROJECT_DIR$/config/Cluster.py" />
+        <option value="$PROJECT_DIR$/spider/test111.py" />
+        <option value="$PROJECT_DIR$/Production_spider.py" />
+        <option value="$PROJECT_DIR$/spider/jianchawang.py" />
+        <option value="$PROJECT_DIR$/spider_model.py" />
+        <option value="$PROJECT_DIR$/spider/ningxia.py" />
+        <option value="$PROJECT_DIR$/spider/update_ktgg_ent.py" />
+        <option value="$PROJECT_DIR$/get_code/CnnApp.py" />
+        <option value="$PROJECT_DIR$/spider/beizhixing_add.py" />
+        <option value="$PROJECT_DIR$/spider/beizhixing_new_api.py" />
+        <option value="$PROJECT_DIR$/config/settings.py" />
+        <option value="$PROJECT_DIR$/MQ/mq.py" />
+        <option value="$PROJECT_DIR$/asyncio_config/manager.py" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="-8" />
+    <option name="y" value="-8" />
+    <option name="width" value="1936" />
+    <option name="height" value="1056" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="single_process" type="b2602c69:ProjectViewProjectNode" />
+              <item name="single_process" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="single_process" type="b2602c69:ProjectViewProjectNode" />
+              <item name="single_process" type="462c0819:PsiDirectoryNode" />
+              <item name="get_code" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="single_process" type="b2602c69:ProjectViewProjectNode" />
+              <item name="single_process" type="462c0819:PsiDirectoryNode" />
+              <item name="get_code" type="462c0819:PsiDirectoryNode" />
+              <item name="model" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="single_process" type="b2602c69:ProjectViewProjectNode" />
+              <item name="single_process" type="462c0819:PsiDirectoryNode" />
+              <item name="spider" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../Monitoring/Monitoring" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\work\single_process\bei" />
+      <recent name="D:\work\single_process" />
+      <recent name="D:\work\single_process\spider" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\work\single_process\filed" />
+      <recent name="D:\work\single_process\spider" />
+      <recent name="D:\work\single_process" />
+      <recent name="D:\work\single_process\asyncio_config" />
+      <recent name="D:\work\single_process\config" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Python.beizhixing_new_api">
+    <configuration name="CnnApp" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="single_process" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/get_code" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/get_code/CnnApp.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="beizhixing_add" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="single_process" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/spider" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/spider/beizhixing_add.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="beizhixing_new_api" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="single_process" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/spider" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/spider/beizhixing_new_api.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="jianchawang" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="single_process" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/spider" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/spider/jianchawang.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="ningxia" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="single_process" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/spider" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/spider/ningxia.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.jianchawang" />
+      <item itemvalue="Python.ningxia" />
+      <item itemvalue="Python.CnnApp" />
+      <item itemvalue="Python.beizhixing_add" />
+      <item itemvalue="Python.beizhixing_new_api" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.beizhixing_new_api" />
+        <item itemvalue="Python.beizhixing_add" />
+        <item itemvalue="Python.CnnApp" />
+        <item itemvalue="Python.ningxia" />
+        <item itemvalue="Python.jianchawang" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="e961fdc0-7f36-43ce-8bec-a064046bdaf2" name="Default Changelist" comment="" />
+      <created>1568777637925</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1568777637925</updated>
+      <workItem from="1568777639529" duration="37567000" />
+      <workItem from="1568942848435" duration="6290000" />
+      <workItem from="1569202569655" duration="860000" />
+      <workItem from="1569204179660" duration="17676000" />
+      <workItem from="1569479449627" duration="20740000" />
+      <workItem from="1569806759795" duration="15338000" />
+      <workItem from="1570607447178" duration="49335000" />
+      <workItem from="1570858889417" duration="11974000" />
+      <workItem from="1571019495557" duration="9707000" />
+      <workItem from="1571104439874" duration="1066000" />
+      <workItem from="1571189067816" duration="5601000" />
+      <workItem from="1571274101664" duration="7600000" />
+      <workItem from="1571362431562" duration="5242000" />
+      <workItem from="1571621456400" duration="7168000" />
+      <workItem from="1571707513109" duration="8185000" />
+      <workItem from="1571794458265" duration="2865000" />
+      <workItem from="1571880158050" duration="3780000" />
+      <workItem from="1571966808834" duration="599000" />
+      <workItem from="1572226631639" duration="598000" />
+      <workItem from="1572312985388" duration="598000" />
+      <workItem from="1572319606237" duration="597000" />
+      <workItem from="1572328876591" duration="1202000" />
+      <workItem from="1572398765992" duration="599000" />
+      <workItem from="1572485519200" duration="4676000" />
+      <workItem from="1572509319479" duration="308000" />
+      <workItem from="1572511249025" duration="283000" />
+      <workItem from="1572512749053" duration="3566000" />
+      <workItem from="1572571540430" duration="599000" />
+      <workItem from="1572830313672" duration="596000" />
+      <workItem from="1573004485614" duration="4065000" />
+      <workItem from="1573090050239" duration="599000" />
+      <workItem from="1573176528878" duration="12096000" />
+      <workItem from="1573436295530" duration="12442000" />
+      <workItem from="1573521578781" duration="5272000" />
+      <workItem from="1573609042027" duration="838000" />
+      <workItem from="1573612930007" duration="1357000" />
+      <workItem from="1573615566164" duration="3434000" />
+      <workItem from="1573694656101" duration="14912000" />
+      <workItem from="1573781264612" duration="585000" />
+      <workItem from="1573783388532" duration="15839000" />
+      <workItem from="1574039850224" duration="20120000" />
+      <workItem from="1574127548852" duration="21817000" />
+      <workItem from="1574213577172" duration="14418000" />
+      <workItem from="1574300175799" duration="20258000" />
+      <workItem from="1574386802816" duration="25141000" />
+      <workItem from="1574645673673" duration="19994000" />
+      <workItem from="1574732818788" duration="20771000" />
+      <workItem from="1574818767319" duration="13687000" />
+      <workItem from="1574904662775" duration="20658000" />
+      <workItem from="1574991297036" duration="3215000" />
+      <workItem from="1574998004976" duration="6641000" />
+      <workItem from="1575250366464" duration="4223000" />
+      <workItem from="1575336659048" duration="10236000" />
+      <workItem from="1575422982895" duration="10888000" />
+      <workItem from="1575449645862" duration="960000" />
+      <workItem from="1575509868402" duration="1997000" />
+      <workItem from="1575521926283" duration="4305000" />
+      <workItem from="1575536113814" duration="1564000" />
+      <workItem from="1575596338986" duration="17159000" />
+      <workItem from="1575855036521" duration="4594000" />
+      <workItem from="1575871363064" duration="10613000" />
+      <workItem from="1575941820265" duration="8009000" />
+      <workItem from="1576027779185" duration="12411000" />
+      <workItem from="1576116344606" duration="1902000" />
+      <workItem from="1576204578421" duration="10115000" />
+      <workItem from="1576460220319" duration="10551000" />
+      <workItem from="1576547947970" duration="8219000" />
+      <workItem from="1576632786994" duration="7185000" />
+      <workItem from="1576720872846" duration="1328000" />
+      <workItem from="1576805896588" duration="11867000" />
+      <workItem from="1577064700725" duration="19013000" />
+      <workItem from="1577151393100" duration="22206000" />
+      <workItem from="1577238570835" duration="18748000" />
+      <workItem from="1577325088643" duration="18003000" />
+      <workItem from="1577409965684" duration="8388000" />
+      <workItem from="1577928824291" duration="14884000" />
+      <workItem from="1578015173927" duration="6070000" />
+      <workItem from="1578274379894" duration="1202000" />
+      <workItem from="1578290524212" duration="4810000" />
+      <workItem from="1578360818514" duration="17050000" />
+      <workItem from="1578447346565" duration="6390000" />
+      <workItem from="1578533587776" duration="2112000" />
+      <workItem from="1578549277354" duration="1817000" />
+      <workItem from="1578880338015" duration="6015000" />
+      <workItem from="1578965396926" duration="2979000" />
+      <workItem from="1579053417009" duration="4284000" />
+      <workItem from="1579225496576" duration="6141000" />
+      <workItem from="1579397398806" duration="3040000" />
+      <workItem from="1579484249121" duration="8732000" />
+      <workItem from="1579570543579" duration="2015000" />
+      <workItem from="1584673904566" duration="358000" />
+      <workItem from="1584674404879" duration="650000" />
+      <workItem from="1585012091291" duration="561000" />
+      <workItem from="1585019083341" duration="5566000" />
+      <workItem from="1585098763712" duration="5720000" />
+      <workItem from="1585184956592" duration="1909000" />
+      <workItem from="1585271548622" duration="583000" />
+      <workItem from="1585530838475" duration="588000" />
+      <workItem from="1585617284918" duration="775000" />
+      <workItem from="1585634782014" duration="1260000" />
+      <workItem from="1585703638608" duration="584000" />
+      <workItem from="1585790064792" duration="566000" />
+      <workItem from="1585807734981" duration="1250000" />
+      <workItem from="1585876268613" duration="1241000" />
+      <workItem from="1586223497635" duration="582000" />
+      <workItem from="1586308334037" duration="2190000" />
+      <workItem from="1586395097076" duration="13867000" />
+      <workItem from="1586482229610" duration="5904000" />
+      <workItem from="1586740531507" duration="17321000" />
+      <workItem from="1586914727491" duration="12653000" />
+      <workItem from="1586999707406" duration="28788000" />
+      <workItem from="1587085931677" duration="8234000" />
+      <workItem from="1587345707405" duration="15494000" />
+      <workItem from="1587431747491" duration="10833000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="932876000" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="true" />
+    <layout>
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17430703" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32936078" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.43492407" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.5796316" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="8" />
+      <window_info anchor="bottom" id="Database Changes" order="9" />
+      <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.32936078" />
+      <window_info anchor="bottom" id="Python Console" order="12" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="SciView" order="3" />
+      <window_info anchor="right" id="Database" order="4" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="demo[2] = '0'+demo[2]" />
+        <watch expression="sys.path" />
+        <watch expression="obj" />
+        <watch expression="body" />
+        <watch expression="self.queue_name" />
+        <watch expression="self.num" />
+        <watch expression="self.duixiang.__getattribute__(callback)(response=response_last)" />
+        <watch expression="self.duixiang.__getattribute__(callback)" />
+        <watch expression="response_last" />
+        <watch expression="response_last" />
+        <watch expression="response_last" />
+        <watch expression="self.duixiang.__getattribute__(callback)" />
+        <watch expression="self.duixiang.__getattribute__(callback)" />
+        <watch expression="self.duixiang.__getattribute__(callback)(response=response_last)" />
+        <watch expression="response.status" />
+        <watch expression="self.duixiang.__getattribute__(callback)" />
+        <watch expression="self.duixiang.__getattribute__(callback)(response=response_last)" />
+        <watch expression="self.duixiang.__getattribute__(callback)(response=response_last)" />
+        <watch expression="json.loads(body.decode('utf-8'))" />
+        <watch expression="response.text" />
+        <watch expression="res" />
+        <watch expression="res.decode('utf-8')" />
+        <watch expression="response.text" />
+        <watch expression="res.decode('utf-8')" />
+        <watch expression="res.decode('utf-8')" />
+        <watch expression="res.decode('utf-8')" />
+        <watch expression="await self.charset_code(res)" />
+        <watch expression="self.charset_code(res)" />
+        <watch expression="res" />
+        <watch expression="res" />
+        <watch expression="response_last" />
+        <watch expression="charset_code" />
+        <watch expression="charset_code" />
+        <watch expression="self.deal_code(res)" />
+        <watch expression="res" />
+        <watch expression="res.decode('utf-8')" />
+        <watch expression="response.cookies" />
+        <watch expression="response.cookies" />
+        <watch expression="charset_code" />
+      </configuration>
+    </watches-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/single_process$jilin.coverage" NAME="jilin Coverage Results" MODIFIED="1579578451769" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$data_wash.coverage" NAME="data_wash Coverage Results" MODIFIED="1574825425280" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$proxys.coverage" NAME="proxys Coverage Results" MODIFIED="1576052626491" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/config" />
+    <SUITE FILE_PATH="coverage/single_process$manager.coverage" NAME="manager Coverage Results" MODIFIED="1575878334447" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/asyncio_config" />
+    <SUITE FILE_PATH="coverage/single_process$shixin_beizhi_api.coverage" NAME="shixin_beizhi_api Coverage Results" MODIFIED="1574307746737" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$update_caipan.coverage" NAME="update_caipan Coverage Results" MODIFIED="1576636129617" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$my_Requests.coverage" NAME="my_Requests Coverage Results" MODIFIED="1586760088913" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/asyncio_config" />
+    <SUITE FILE_PATH="coverage/single_process$update_shixin.coverage" NAME="update_shixin Coverage Results" MODIFIED="1586748607151" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$add_beizhixing_source.coverage" NAME="add_beizhixing_source Coverage Results" MODIFIED="1586424059455" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$beijing_baoguang.coverage" NAME="beijing_baoguang Coverage Results" MODIFIED="1570862625052" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$all_config.coverage" NAME="all_config Coverage Results" MODIFIED="1575360928063" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/config" />
+    <SUITE FILE_PATH="coverage/single_process$end_case.coverage" NAME="end_case Coverage Results" MODIFIED="1575965034829" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$th_read.coverage" NAME="th_read Coverage Results" MODIFIED="1574399836283" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/asyncio_config" />
+    <SUITE FILE_PATH="coverage/single_process$shanghai_kt.coverage" NAME="shanghai_kt Coverage Results" MODIFIED="1574305417991" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$tests.coverage" NAME="tests Coverage Results" MODIFIED="1586485994035" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$update_beizhixing.coverage" NAME="update_beizhixing Coverage Results" MODIFIED="1578368343818" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$beizhixing.coverage" NAME="beizhixing Coverage Results" MODIFIED="1587086678654" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$gansu.coverage" NAME="gansu Coverage Results" MODIFIED="1569549288144" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$douban_delete.coverage" NAME="douban_delete Coverage Results" MODIFIED="1573712801632" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$start_process.coverage" NAME="start_process Coverage Results" MODIFIED="1574922989507" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Listener" />
+    <SUITE FILE_PATH="coverage/single_process$update_zbaj.coverage" NAME="update_zbaj Coverage Results" MODIFIED="1577154498352" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$beijing_baoguang_gaoxiao.coverage" NAME="beijing_baoguang_gaoxiao Coverage Results" MODIFIED="1570862455986" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$beizhixing_add.coverage" NAME="beizhixing_add Coverage Results" MODIFIED="1587440320674" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$Cluster.coverage" NAME="Cluster Coverage Results" MODIFIED="1574652002355" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/config" />
+    <SUITE FILE_PATH="coverage/single_process$beizhixing_api.coverage" NAME="beizhixing_api Coverage Results" MODIFIED="1587015742576" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$Listener_run__1_.coverage" NAME="Listener_run (1) Coverage Results" MODIFIED="1574932481001" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Listener" />
+    <SUITE FILE_PATH="coverage/single_process$Practice.coverage" NAME="Practice Coverage Results" MODIFIED="1568885158248" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$update_ktgg.coverage" NAME="update_ktgg Coverage Results" MODIFIED="1577955899214" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$run.coverage" NAME="run Coverage Results" MODIFIED="1574389747103" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/single_process$update_caipan_close.coverage" NAME="update_caipan_close Coverage Results" MODIFIED="1574674099611" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$Listener_runer.coverage" NAME="Listener_runer Coverage Results" MODIFIED="1575626964781" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Listener" />
+    <SUITE FILE_PATH="coverage/single_process$ningxia.coverage" NAME="ningxia Coverage Results" MODIFIED="1587376659698" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$shixin_beizhi.coverage" NAME="shixin_beizhi Coverage Results" MODIFIED="1587017540086" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$do_work.coverage" NAME="do_work Coverage Results" MODIFIED="1575016603789" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/single_process$shixin_limit__1_.coverage" NAME="shixin_limit (1) Coverage Results" MODIFIED="1577254268524" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/bei" />
+    <SUITE FILE_PATH="coverage/single_process$update_ktgg_ent.coverage" NAME="update_ktgg_ent Coverage Results" MODIFIED="1577958012161" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$Production_spider__1_.coverage" NAME="Production_spider (1) Coverage Results" MODIFIED="1568790562285" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/single_process$shixin_beizhi_api_asy.coverage" NAME="shixin_beizhi_api_asy Coverage Results" MODIFIED="1574152072977" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$jianchawang.coverage" NAME="jianchawang Coverage Results" MODIFIED="1587354952229" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$update_ktgg_xd.coverage" NAME="update_ktgg_xd Coverage Results" MODIFIED="1578018166862" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$correlation.coverage" NAME="correlation Coverage Results" MODIFIED="1572514048614" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$Listener_run.coverage" NAME="Listener_run Coverage Results" MODIFIED="1574931155342" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Listener" />
+    <SUITE FILE_PATH="coverage/single_process$add_ktgg_source.coverage" NAME="add_ktgg_source Coverage Results" MODIFIED="1586423867185" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$settings.coverage" NAME="settings Coverage Results" MODIFIED="1574758113041" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/config" />
+    <SUITE FILE_PATH="coverage/single_process$data_deal.coverage" NAME="data_deal Coverage Results" MODIFIED="1574646397048" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/config" />
+    <SUITE FILE_PATH="coverage/single_process$test111.coverage" NAME="test111 Coverage Results" MODIFIED="1587346774530" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$Production_spider.coverage" NAME="Production_spider Coverage Results" MODIFIED="1587354655522" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/single_process$update_bgt.coverage" NAME="update_bgt Coverage Results" MODIFIED="1578366029260" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$CnnApp.coverage" NAME="CnnApp Coverage Results" MODIFIED="1587439411986" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/get_code" />
+    <SUITE FILE_PATH="coverage/single_process$spider_model.coverage" NAME="spider_model Coverage Results" MODIFIED="1574386939576" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/single_process$beizhixing_update.coverage" NAME="beizhixing_update Coverage Results" MODIFIED="1587020142050" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$beizhixing_new_api.coverage" NAME="beizhixing_new_api Coverage Results" MODIFIED="1587450644900" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$susong.coverage" NAME="susong Coverage Results" MODIFIED="1569314542356" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$shixin_limit.coverage" NAME="shixin_limit Coverage Results" MODIFIED="1587018723663" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$update_xgl.coverage" NAME="update_xgl Coverage Results" MODIFIED="1577416370955" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$shixin_limit_pages.coverage" NAME="shixin_limit_pages Coverage Results" MODIFIED="1577267548636" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$shixin_susong.coverage" NAME="shixin_susong Coverage Results" MODIFIED="1574838142375" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$shanghai.coverage" NAME="shanghai Coverage Results" MODIFIED="1577351414434" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$Listener.coverage" NAME="Listener Coverage Results" MODIFIED="1568778518769" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Listener" />
+    <SUITE FILE_PATH="coverage/single_process$dalian.coverage" NAME="dalian Coverage Results" MODIFIED="1569549723627" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$stop_work.coverage" NAME="stop_work Coverage Results" MODIFIED="1574935573676" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Listener" />
+    <SUITE FILE_PATH="coverage/single_process$import_tables.coverage" NAME="import_tables Coverage Results" MODIFIED="1586762740008" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$mq.coverage" NAME="mq Coverage Results" MODIFIED="1577095433899" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/MQ" />
+    <SUITE FILE_PATH="coverage/single_process$tes.coverage" NAME="tes Coverage Results" MODIFIED="1571020067056" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$shixin_beizhi_baidu.coverage" NAME="shixin_beizhi_baidu Coverage Results" MODIFIED="1573464863303" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+    <SUITE FILE_PATH="coverage/single_process$neimeng_aysc.coverage" NAME="neimeng_aysc Coverage Results" MODIFIED="1573724595757" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spider" />
+  </component>
+  <component name="debuggerHistoryManager">
+    <expressions id="evaluateCodeFragment">
+      <expression>
+        <expression-string>type(response.cookies)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>for i in response.cookies:
+    print(i)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>issubclass(obj, Manager)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>inspect.isclass(obj) and \
+           issubclass(obj, Manager) and \
+           obj.__module__ == module.__name__ and \
+           getattr(obj, 'name', None)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+    </expressions>
+    <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>str(response.cookies['TS01ecb577']).replace('Set-Cookie: ', '')</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>response.cookies['TS01ecb577'].replace('Set-Cookie: ', '')</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>type(response.cookies['TS01ecb577'])</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>response.cookies['SESSION']</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>response.cookies[0]</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>type(response.cookies)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>for i in response.cookies:</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>response</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>response.cookies</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/spider/update_ktgg_xd.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1650">
+          <caret line="66" selection-start-line="66" selection-end-line="66" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Listener/Listener_runer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="125">
+          <caret line="5" column="22" lean-forward="true" selection-start-line="5" selection-start-column="22" selection-end-line="5" selection-end-column="22" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Listener/start_process.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="500">
+          <caret line="20" lean-forward="true" selection-start-line="20" selection-end-line="20" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Listener/Listener_config.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="525">
+          <caret line="33" column="25" selection-start-line="33" selection-start-column="25" selection-end-line="33" selection-end-column="25" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/actuator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1100">
+          <caret line="50" column="49" selection-start-line="50" selection-start-column="49" selection-end-line="50" selection-end-column="49" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/jilin.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="25">
+          <caret line="6" column="8" selection-start-line="6" selection-start-column="8" selection-end-line="6" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/anaconda/Lib/urllib/parse.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="299">
+          <caret line="415" column="4" selection-start-line="415" selection-start-column="4" selection-end-line="415" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bei/beijing_baoguang_gaoxiao.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="11">
+          <caret line="61" column="89" selection-start-line="61" selection-start-column="16" selection-end-line="61" selection-end-column="89" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/creat_project.py" />
+    <entry file="file://$PROJECT_DIR$/bei/dalian.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="30" column="48" lean-forward="true" selection-start-line="30" selection-start-column="48" selection-end-line="32" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bei/shixin_beizhi.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2050">
+          <caret line="82" column="46" selection-start-line="81" selection-start-column="8" selection-end-line="82" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/add_ktgg_source.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="598">
+          <caret line="32" column="49" selection-start-line="32" selection-start-column="49" selection-end-line="32" selection-end-column="49" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/add_beizhixing_source.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="775">
+          <caret line="31" column="52" selection-start-line="31" selection-start-column="52" selection-end-line="31" selection-end-column="52" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/update_shixin.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="398">
+          <caret line="96" column="37" lean-forward="true" selection-start-line="96" selection-start-column="37" selection-end-line="96" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/all_config.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="350">
+          <caret line="14" column="21" lean-forward="true" selection-start-line="14" selection-start-column="21" selection-end-line="14" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/import_tables.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="473">
+          <caret line="65" column="25" lean-forward="true" selection-start-line="65" selection-start-column="25" selection-end-line="65" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/update_beizhixing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="775">
+          <caret line="121" column="70" selection-start-line="121" selection-start-column="70" selection-end-line="121" selection-end-column="89" />
+          <folding>
+            <element signature="e#24#34#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/data_wash.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#479#15361#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/tests.py" />
+    <entry file="file://$PROJECT_DIR$/spider/shanghai.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="24">
+          <caret line="36" column="60" selection-start-line="36" selection-start-column="60" selection-end-line="36" selection-end-column="60" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/beizhixing_null_pname.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="350">
+          <caret line="14" column="103" selection-start-line="14" selection-start-column="103" selection-end-line="14" selection-end-column="103" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/proxys.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="322">
+          <caret line="50" column="10" selection-start-line="50" selection-start-column="10" selection-end-line="50" selection-end-column="10" />
+          <folding>
+            <element signature="e#0#14#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/asyncio_config/my_Requests.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="16" column="129" selection-start-line="16" selection-start-column="124" selection-end-line="16" selection-end-column="129" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/shixin_limit.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="630">
+          <caret line="212" column="42" lean-forward="true" selection-start-line="212" selection-start-column="42" selection-end-line="212" selection-end-column="42" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/beizhixing_update.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1357">
+          <caret line="145" column="38" lean-forward="true" selection-start-line="145" selection-start-column="38" selection-end-line="145" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/shixin_beizhi.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="40">
+          <caret line="53" column="36" lean-forward="true" selection-start-line="53" selection-start-column="36" selection-end-line="53" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/end_case.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1225">
+          <caret line="49" selection-start-line="49" selection-end-line="49" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/anaconda/Lib/site-packages/requests/sessions.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="112">
+          <caret line="340" selection-start-line="340" selection-end-line="340" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/anaconda/Lib/site-packages/requests/utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="112">
+          <caret line="738" selection-start-line="738" selection-end-line="738" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/asyncio_config/th_read.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1825">
+          <caret line="79" column="24" selection-start-line="79" selection-start-column="24" selection-end-line="79" selection-end-column="24" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/update_caipan.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="584">
+          <caret line="461" column="56" selection-start-line="461" selection-start-column="56" selection-end-line="461" selection-end-column="56" />
+          <folding>
+            <element signature="e#959#23546#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/test111.py" />
+    <entry file="file://$PROJECT_DIR$/Production_spider.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="50">
+          <caret line="2" column="44" lean-forward="true" selection-start-line="2" selection-start-column="44" selection-end-line="2" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/jianchawang.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="559">
+          <caret line="141" column="33" lean-forward="true" selection-start-line="141" selection-start-column="33" selection-end-line="141" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider_model.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="236">
+          <caret line="26" selection-start-line="26" selection-end-line="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/get_code/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/get_code/img_dir/a.jpg">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/data_deal.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="166">
+          <caret line="375" column="8" selection-start-line="375" selection-start-column="8" selection-end-line="375" selection-end-column="8" />
+          <folding>
+            <element signature="e#24#35#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/Cluster.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="599">
+          <caret line="105" column="13" lean-forward="true" selection-start-line="105" selection-start-column="13" selection-end-line="105" selection-end-column="13" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/ningxia.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="448">
+          <caret line="217" column="29" selection-start-line="217" selection-start-column="29" selection-end-line="217" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/update_ktgg.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="598">
+          <caret line="102" column="64" selection-start-line="102" selection-start-column="64" selection-end-line="102" selection-end-column="83" />
+          <folding>
+            <element signature="e#24#34#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/beizhixing_api.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="25">
+          <caret line="73" column="32" lean-forward="true" selection-start-line="73" selection-start-column="32" selection-end-line="73" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/update_ktgg_ent.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="823">
+          <caret line="43" column="37" lean-forward="true" selection-start-line="43" selection-start-column="37" selection-end-line="43" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/get_code/CnnApp.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="248">
+          <caret line="187" column="56" lean-forward="true" selection-start-line="187" selection-start-column="56" selection-end-line="187" selection-end-column="56" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/beizhixing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="159">
+          <caret line="66" column="20" selection-start-line="66" selection-start-column="8" selection-end-line="66" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/beizhixing_add.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="6" column="6" selection-start-line="6" selection-start-column="6" selection-end-line="6" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="71">
+          <caret line="64" column="1" selection-start-line="60" selection-start-column="12" selection-end-line="64" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/beizhixing_new_api.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="246">
+          <caret line="59" column="26" selection-start-line="59" selection-start-column="26" selection-end-line="59" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MQ/mq.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="364">
+          <caret line="37" column="130" selection-start-line="37" selection-start-column="130" selection-end-line="37" selection-end-column="130" />
+          <folding>
+            <element signature="e#24#35#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/run_shell.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="275">
+          <caret line="11" selection-start-line="11" selection-end-line="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/asyncio_config/manager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="367">
+          <caret line="260" column="26" lean-forward="true" selection-start-line="260" selection-start-column="26" selection-end-line="260" selection-end-column="26" />
+          <folding>
+            <element signature="e#24#33#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>

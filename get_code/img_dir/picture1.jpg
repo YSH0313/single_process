@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=1200">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title>哎呀,出错了！中国执行信息公开网</title>
+	<link rel="icon" type="image/x-icon" href="http://zxgk.court.gov.cn/error/img/favicon.ico" />
+	<link rel="stylesheet" type="text/css" href="http://zxgk.court.gov.cn/error/css/scroll.css">
+	<link rel="stylesheet" type="text/css" href="http://zxgk.court.gov.cn/error/css/main.css">
+</head>
+<body>
+<div class="main_body">
+<div class="headbg">
+<div class="head_title">
+	<img src="http://zxgk.court.gov.cn/error/img/lgoo.png" style="float:left">
+</div>
+<div class="QRcode"><img alt="" src="http://zxgk.court.gov.cn/error/img/QRcode.png"></div>
+</div>
+<div class="main">
+	<div id="container">
+	<div class="errorbd" >
+		<div id="error">
+				<div class="message">网络繁忙,请稍候再试......</div>
+				<div class="box2">
+						<ul>
+								<li><a href="http://zxgk.court.gov.cn/" target="_self">返回网站首页</a></li>
+						</ul>
+				</div>
+		</div>
+	</div>
+	</div>
+		<div class="bottom" style="background: #c20001;">
+			<div style="height: 30px;line-height: 30px;">
+			   <a target="_blank" href="https://sf.taobao.com/"><span class="wlsfptlj_01">网络司法平台链接：淘宝&nbsp;</span></a>
+			   <a target="_blank" href="http://auction.jd.com/sifa.html"><span class="wlsfptlj_01">|&nbsp;&nbsp;京东</span></a>
+			   <a target="_blank" href="http://www.rmfysszc.gov.cn"><span class="wlsfptlj_01">&nbsp;&nbsp;&nbsp;&nbsp;人民法院诉讼资产网&nbsp;</span></a>
+			   <a target="_blank" href="http://www.gpai.net/sf/"><span class="wlsfptlj_01">|&nbsp;&nbsp;公拍网&nbsp;</span></a>
+			   <a target="_blank" href="http://www.caa123.org.cn/main/index.jsp"><span class="wlsfptlj_01">|&nbsp;&nbsp;中国拍卖行业协会</span></a>
+			</div>
+			<div style="height: 30px;line-height: 30px;">
+			   <a target="_blank" href="http://www.camra2006.org.cn/"><span class="wlsfptlj_01">中国矿业权评估师协会&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;</span></a>
+			   <a target="_blank" href="http://www.creva.org.cn/HTML/index_2.html"><span class="wlsfptlj_01">中国土地估价师协会&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;</span></a>
+			   <a target="_blank" href="http://www.cas.org.cn/zywk/"><span class="wlsfptlj_01">中国资产评估协会&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;</span></a>
+			   <a target="_blank" href="http://www.jewellery.org.cn/"><span class="wlsfptlj_01">中国珠宝玉石首饰行业协会&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;</span></a>
+			   <a target="_black" href="http://www.cirea.org.cn/article/list/0082.html"><span class="wlsfptlj_01">中国房地产估价师与房地产经纪人学会&nbsp;&nbsp;</span></a>
+			</div>
+			<div style="height: 30px;line-height: 30px;">
+				<div style="width: 850px;margin: 0 auto;height: 20px;">
+					<span>地址：北京市东城区东交民巷27号&nbsp</span>
+					<span> 邮编：100745&nbsp</span>
+					<span>总机：010-67550114&nbsp</span>
+				</div>
+			</div>
+			<div style="margin-top:20px;width:100%;height:20px;/* color: black; */">中华人民共和国最高人民法院&nbsp版权所有</div>
+			<div style="margin-top:20px;/* color: black; */">京ICP备05023036号</div> 
+	  </div>
+	</div>
+</div>
+</body>
+</html>
