@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "js-md5": "^0.7.3",
+    "tesseract.js": "^4.0.2",
+    "wasm2js": "^0.2.0"
+  }
+}
