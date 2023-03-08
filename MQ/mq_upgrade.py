@@ -114,7 +114,7 @@ class MqProducer:
             return str(message), 0
 
     @retrying(stop_max_attempt_number=Rabbitmq['max_retries'])  # 重试装饰器
-    def send_message(self, message, **kwargs):
+    def send_message(self, message, befor_fun=reconnect, befor_parmas=conn):
         """生产者"""
         message, level = self.make_data(message)
         with self.get_connection() as connection:
@@ -134,11 +134,10 @@ class MqProducer:
         # self.work_list.append(
         #     self.async_thread_pool.submit(self.send_message, message=message, befor_fun=self.reconnect,
         #                                   befor_parmas=self.conn))
-        self.async_thread_pool.submit(self.send_message, message=message, befor_fun=self.reconnect,
-                                      befor_parmas=self.conn)
+        self.async_thread_pool.submit(self.send_message, message=message)
 
     @retrying(stop_max_attempt_number=Rabbitmq['max_retries'])  # 重试装饰器
-    def get_message(self, **kwargs):
+    def get_message(self, befor_fun=reconnect, befor_parmas=conn):
         """消费者"""
         with self.get_connection() as connection:
             channel = connection.channel()
@@ -177,14 +176,17 @@ class MqProducer:
         if r.status_code != 200:
             return 0, 0, 0
         dic = json.loads(r.text)
+        # print(dic)
         try:
             return dic['messages']
         except KeyError:
+            import traceback
+            traceback.print_exc()
             return 0
 
     def delete_queue(self, queue_name):
-        # url = f'http://{self.rabbit_host}:15672/api/queues/%2F/{queue_name}'
-        url = f'http://{self.rabbit_host}/api/queues/%2F/{queue_name}'
+        url = f'http://{self.rabbit_host}:15672/api/queues/%2F/{queue_name}'
+        # url = f'http://{self.rabbit_host}/api/queues/%2F/{queue_name}'
         data = {"vhost": "/", "name": f"{queue_name}", "mode": "delete"}
         self.req_s.delete(url=url, json=data, auth=(self.rabbit_username, self.rabbit_password))
 
@@ -217,7 +219,7 @@ if __name__ == '__main__':
     start_time = time.time()
     producer = MqProducer(queue_name='test_queue')
     producer.start()
-    producer.get_message(befor_fun=producer.reconnect, befor_parmas=producer.conn)
+    producer.get_message()
     end_time = time.time()
     total = (end_time - start_time)
     print(total)

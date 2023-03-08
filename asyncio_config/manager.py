@@ -21,6 +21,7 @@ from yarl import URL
 from scrapy.selector import Selector
 from collections import Iterator
 from config.Basic import Basic
+from concurrent.futures import ThreadPoolExecutor
 from asyncio_config.my_Requests import MyResponse
 from concurrent.futures import wait, ALL_COMPLETED
 from config.settings import PREFETCH_COUNT, TIME_OUT, X_MAX_PRIORITY, Mysql, IS_PROXY, IS_SAMEIP, Asynch, Waiting_time, \
@@ -46,6 +47,8 @@ def count_time(func):
 
 class LoopGetter(object):
     def __init__(self):
+        self.parse_thread_pool = ThreadPoolExecutor(Rabbitmq['async_thread_pool_size'])  # 数据处理线程池
+
         # 定义一个线程，运行一个事件循环对象，用于实时接收新任务
         self.new_loop = asyncio.new_event_loop()
         self.loop_thread = threading.Thread(target=self.start_loop, args=(self.new_loop,))
@@ -137,8 +140,10 @@ class Manager(Basic, LoopGetter):
 
     def make_start_request(self, start_fun):
         try:
-            for s in self.__getattribute__(start_fun.__name__)():
-                self.send_message(message=s, befor_fun=self.reconnect, befor_parmas=self.conn)
+            start_task = self.__getattribute__(start_fun.__name__)()
+            if isinstance(start_task, Iterator):
+                for s in start_task:
+                    self.send_message(message=s)
         except:
             import traceback
             traceback.print_exc()
@@ -154,7 +159,7 @@ class Manager(Basic, LoopGetter):
                 self.delete_queue(queue_name=self.queue_name)
                 self.logger.info('The queue has been cleared automatically')
             except:
-                self.logger.debug('The crawler task failed to start because the automatic queue clearing failed')
+                self.logger.error('The automatic queue clearing failed', exc_info=True)
                 if self.pages:
                     self.send_close_info()
         self.starttime = self.now_time()
@@ -187,8 +192,10 @@ class Manager(Basic, LoopGetter):
             asyncio.run_coroutine_threadsafe(self.shutdown_spider(spider_name=self.name),
                                              self.shutdown_loop)  # 开启监控队列状态
             self.consumer_status = self.async_thread_pool.submit(self.get_message)  # 开启消费者
-
             self.logger.info('Consumer thread open ' + str(self.consumer_status))
+            self.work_list.append(self.consumer_status)
+            wait(fs=self.work_list, timeout=None, return_when=ALL_COMPLETED)
+
         elif status == False:
             return
 
@@ -233,7 +240,7 @@ class Manager(Basic, LoopGetter):
         os._exit(0)  # 暂时重新启用，待观察
 
     @retrying(stop_max_attempt_number=Rabbitmq['max_retries'])  # 重试装饰器
-    def get_message(self, **kwargs):
+    def get_message(self, befor_fun='reconnect', befor_parmas='conn'):
         """消费者"""
         self.logger.info('开始消费')
         with self.get_connection() as connection:
@@ -255,50 +262,57 @@ class Manager(Basic, LoopGetter):
             self.logger.debug(f'The request queue is full，进程号为：{os.getpid()}')
             time.sleep(1)
         flag = self.is_json(body.decode('utf-8'))
-        if not flag:
-            fun_lists = self.parse_only(body=body.decode('utf-8'))
-            if isinstance(fun_lists, Iterator):
-                for p in fun_lists:
-                    self.async_send_message(message=p)
+        if not flag:  # 判断是否为请求消息，如果不是的话
+
+            self.parse_thread_pool.submit(self.parse_only, body=body.decode('utf-8'))
+
+            # fun_lists = self.parse_only(body=body.decode('utf-8'))
+            # if isinstance(fun_lists, Iterator):
+            #     for p in fun_lists:
+            #         self.async_send_message(message=p)
             self.num += 1
-        if flag:
-            contents = json.loads(body.decode('utf-8'))
-            callback_demo = contents.get('callback')
-            is_encode = contents.get('is_encode')
-            url = contents.get('url')
-            headers = contents.get('headers')
-            params = contents.get('params')
-            data = contents.get('data')
-            json_params = contents.get('json_params')
-            timeout = contents.get('timeout')
-            dont_filter = contents.get('dont_filter')
-            encoding = contents.get('encoding')
-            meta = contents.get('meta')
-            for k, v in meta.items():
-                if self.is_json(v) and not isinstance(v, dict):
-                    meta[k] = json.loads(v, object_hook=self.handle)
-            level = contents.get('level')
-            proxy = contents.get('proxy')
-            meta['proxy'] = proxy if proxy and self.is_sameip else meta.get('proxy')
-            verify_ssl = contents.get('verify_ssl')
-            allow_redirects = contents.get('allow_redirects')
-            is_file = contents.get('is_file')
-            retry_count = 0 if contents.get('retry_count') == None else contents.get('retry_count')
-            is_change = contents.get('is_change')
-            param = meta, meta.get('proxy') if (meta if meta else {}) else proxy
-            meta = param[0]
-            proxy = param[1] if meta.get('proxy') else proxy
-            ignore_ip = contents.get('ignore_ip')
-            methods = 'POST' if contents.get('method') == 'POST' else 'GET'
-            timeout = timeout if timeout else self.timeout
-            asyncio.run_coroutine_threadsafe(
-                self.make_Requests(method=methods, is_encode=is_encode, url=url, body=body,
-                                   headers=headers, params=params, data=data, json_params=json_params,
-                                   timeout=timeout, callback=callback_demo, dont_filter=dont_filter,
-                                   encoding=encoding, meta=meta, level=level, proxy=proxy,
-                                   verify_ssl=verify_ssl, is_file=is_file, retry_count=retry_count,
-                                   is_change=is_change, allow_redirects=allow_redirects,
-                                   ignore_ip=ignore_ip, request_info=body.decode('utf-8')), self.new_loop)
+        if flag:  # 判断是否为请求消息，如果是的话
+            self.make_params(body)
+
+    def make_params(self, body):
+        """获取并处理有关的参数"""
+        contents = json.loads(body.decode('utf-8'))
+        callback_demo = contents.get('callback')
+        is_encode = contents.get('is_encode')
+        url = contents.get('url')
+        headers = contents.get('headers')
+        params = contents.get('params')
+        data = contents.get('data')
+        json_params = contents.get('json_params')
+        timeout = contents.get('timeout')
+        dont_filter = contents.get('dont_filter')
+        encoding = contents.get('encoding')
+        meta = contents.get('meta')
+        for k, v in meta.items():
+            if self.is_json(v) and not isinstance(v, dict):
+                meta[k] = json.loads(v, object_hook=self.handle)
+        level = contents.get('level')
+        proxy = contents.get('proxy')
+        meta['proxy'] = proxy if proxy and self.is_sameip else meta.get('proxy')
+        verify_ssl = contents.get('verify_ssl')
+        allow_redirects = contents.get('allow_redirects')
+        is_file = contents.get('is_file')
+        retry_count = 0 if contents.get('retry_count') == None else contents.get('retry_count')
+        is_change = contents.get('is_change')
+        param = meta, meta.get('proxy') if (meta if meta else {}) else proxy
+        meta = param[0]
+        proxy = param[1] if meta.get('proxy') else proxy
+        ignore_ip = contents.get('ignore_ip')
+        methods = 'POST' if contents.get('method') == 'POST' else 'GET'
+        timeout = timeout if timeout else self.timeout
+        asyncio.run_coroutine_threadsafe(
+            self.make_Requests(method=methods, is_encode=is_encode, url=url, body=body,
+                               headers=headers, params=params, data=data, json_params=json_params,
+                               timeout=timeout, callback=callback_demo, dont_filter=dont_filter,
+                               encoding=encoding, meta=meta, level=level, proxy=proxy,
+                               verify_ssl=verify_ssl, is_file=is_file, retry_count=retry_count,
+                               is_change=is_change, allow_redirects=allow_redirects,
+                               ignore_ip=ignore_ip, request_info=body.decode('utf-8')), self.new_loop)
 
     async def request_preprocess(self, body, url, proxy, is_change, meta, req_id, params, data, json_params, headers):
         """请求预处理"""
