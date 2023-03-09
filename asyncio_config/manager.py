@@ -119,7 +119,7 @@ class Manager(Basic, LoopGetter):
         else:
             return False
 
-    def open_spider(self, spider_name):
+    def open_spider(self, spider_name: str):
         """开启spider第一步检查状态"""
         data = self.select(table='spiderlist_monitor', columns=['owner', 'remarks'],
                            where=f"""spider_name = '{spider_name}'""")
@@ -138,7 +138,7 @@ class Manager(Basic, LoopGetter):
         self.logger.info('Crawler program starts')
         return True
 
-    def make_start_request(self, start_fun):
+    def make_start_request(self, start_fun: {__name__}):
         try:
             start_task = self.__getattribute__(start_fun.__name__)()
             if isinstance(start_task, Iterator):
@@ -174,7 +174,6 @@ class Manager(Basic, LoopGetter):
                     self.async_thread_pool.submit(self.make_start_request, start_fun=self.start_requests)
                     wait(fs=self.work_list, timeout=None, return_when=ALL_COMPLETED)
 
-                    # pass
                     # start_th(fun_lists=[self.start_requests], queue_name=self.name,
                     #          signal=self.custom_settings['Breakpoint'])
 
@@ -186,8 +185,7 @@ class Manager(Basic, LoopGetter):
                 else:  # 如果不需要异步生产（等生产完之后再开始消费）
                     self.work_list.append(
                         self.async_thread_pool.submit(self.make_start_request, start_fun=self.start_requests))
-                    ret = wait(fs=self.work_list, timeout=None, return_when=ALL_COMPLETED)
-                    print(f"work_list ALL_COMPLETED, ret:{ret}")
+                    wait(fs=self.work_list, timeout=None, return_when=ALL_COMPLETED)
 
             asyncio.run_coroutine_threadsafe(self.shutdown_spider(spider_name=self.name),
                                              self.shutdown_loop)  # 开启监控队列状态
@@ -263,8 +261,7 @@ class Manager(Basic, LoopGetter):
             time.sleep(1)
         flag = self.is_json(body.decode('utf-8'))
         if not flag:  # 判断是否为请求消息，如果不是的话
-
-            self.parse_thread_pool.submit(self.parse_only, body=body.decode('utf-8'))
+            self.parse_thread_pool.submit(self.parse_only, body=body.decode('utf-8'))  # 多线程数据处理
 
             # fun_lists = self.parse_only(body=body.decode('utf-8'))
             # if isinstance(fun_lists, Iterator):
