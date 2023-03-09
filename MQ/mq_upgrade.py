@@ -2,7 +2,7 @@
 # @Author: yuanshaohang
 # @Date: 2023-02-23- 09:56:50
 # @Version: 1.0.0
-# @Description: TODO
+# @Description: rabbitmq队列中间件
 
 import sys
 import time
@@ -68,7 +68,7 @@ class MqProducer:
 
     def reconnect(self, connection):
         """重练机制"""
-        print('开始重连')
+        # print('开始重连')
         try:
             connection.close()
             connection = self.conn()
