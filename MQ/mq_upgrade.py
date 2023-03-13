@@ -16,7 +16,7 @@ from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED
 
 from items import *
 from asyncio_config.my_Requests import MyFormRequests, MyRequests
-from config.settings import Rabbitmq
+from config.settings import Rabbitmq, message_ttl, Auto_clear
 
 
 class MqProducer:
@@ -40,6 +40,29 @@ class MqProducer:
         self.queue_name = self.make_queue_name(queue_name)
         self.req_s = requests.session()
 
+        self.connection = pika.BlockingConnection(
+            pika.ConnectionParameters(
+                host=self.rabbit_host, port=self.rabbit_port,
+                credentials=pika.credentials.PlainCredentials(self.rabbit_username, self.rabbit_password), heartbeat=0
+            )
+        )
+        self.channel = self.connection.channel()
+        self.channel_declare()
+        if Auto_clear:
+            self.channel.queue_delete(self.queue_name)
+            self.conn()
+
+    def rm_task(self):
+        """移除已结束的线程子任务池"""
+        [self.work_list.remove(i) for i in self.work_list if i.done()]
+
+    def channel_declare(self):
+        """对队列进行声明"""
+        return self.channel.queue_declare(queue=self.queue_name,
+                                          arguments={'x-max-priority': (Rabbitmq['X_MAX_PRIORITY'] or 0),
+                                                     'x-queue-mode': 'lazy', 'x-message-ttl': message_ttl},
+                                          durable=True)
+
     def conn(self):
         """建立连接"""
         connection = pika.BlockingConnection(
@@ -48,7 +71,10 @@ class MqProducer:
                 credentials=pika.credentials.PlainCredentials(self.rabbit_username, self.rabbit_password), heartbeat=0
             )
         )
-        return connection
+        channel = connection.channel()
+        self.channel = channel
+        self.channel_declare()
+        return self.channel
 
     def get_connection(self):
         """构造连接池并获取连接"""
@@ -60,7 +86,7 @@ class MqProducer:
                     self.connections.put(connection)
             finally:
                 self.lock.release()
-        return self.connections.get(block=True)
+        return self.connections.get()
 
     def return_connection(self, connection):
         """重新连接后放到连接池里"""
@@ -117,34 +143,15 @@ class MqProducer:
     def send_message(self, message, befor_fun=reconnect, befor_parmas=conn):
         """生产者"""
         message, level = self.make_data(message)
-        with self.get_connection() as connection:
-            channel = connection.channel()
-            channel.queue_declare(queue=self.queue_name,
-                                  arguments={'x-max-priority': (Rabbitmq['X_MAX_PRIORITY'] or 0),
-                                             'x-queue-mode': 'lazy', 'x-message-ttl': Rabbitmq['message_ttl']},
-                                  durable=True)
 
-            channel.basic_publish(exchange='', routing_key=self.queue_name, body=message,
-                                  properties=pika.BasicProperties(priority=level, delivery_mode=1))
-            # print(f"已发送消息：{message}, {time.time()}")
-            # time.sleep(0.001)
-
-    def async_send_message(self, message):
-        """异步发送消息"""
-        # self.work_list.append(
-        #     self.async_thread_pool.submit(self.send_message, message=message, befor_fun=self.reconnect,
-        #                                   befor_parmas=self.conn))
-        self.async_thread_pool.submit(self.send_message, message=message)
+        self.channel.basic_publish(exchange='', routing_key=self.queue_name, body=message,
+                                   properties=pika.BasicProperties(priority=level, delivery_mode=1))
+        # print(f"已发送消息：{message}, {time.time()}")
 
     @retrying(stop_max_attempt_number=Rabbitmq['max_retries'])  # 重试装饰器
     def get_message(self, befor_fun=reconnect, befor_parmas=conn):
         """消费者"""
-        with self.get_connection() as connection:
-            channel = connection.channel()
-            channel.queue_declare(queue=self.queue_name,
-                                  arguments={'x-max-priority': (Rabbitmq['X_MAX_PRIORITY'] or 0),
-                                             'x-queue-mode': 'lazy', 'x-message-ttl': Rabbitmq['message_ttl']},
-                                  durable=True)
+        with self.get_connection() as channel:
             channel.basic_qos(prefetch_count=1)  # 让rabbitmq不要一次将超过1条消息发送给work
             channel.basic_consume(queue=self.queue_name, on_message_callback=self.Requests)
             channel.start_consuming()
@@ -156,6 +163,7 @@ class MqProducer:
         return data
 
     def handle(self, obj):
+        """处理特殊meta参数"""
         item_name = obj.get('item_name')
         if item_name:
             del obj['item_name']
@@ -169,73 +177,39 @@ class MqProducer:
         else:
             return obj
 
-    def getMessageCount(self, queue_name):
+    def getMessageCount(self):
         # 返回3种消息数量：ready, unacked, total
-        url = 'http://%s:15672/api/queues/%s/%s' % (self.rabbit_host, self.vhost_check, queue_name)
+        url = 'http://%s:15672/api/queues/%s/%s' % (self.rabbit_host, self.vhost_check, self.queue_name)
         r = self.req_s.get(url, auth=(self.rabbit_username, self.rabbit_password))
         if r.status_code != 200:
             return 0, 0, 0
         dic = json.loads(r.text)
-        # print(dic)
-        try:
-            return dic['messages']
-        except KeyError:
-            import traceback
-            traceback.print_exc()
-            return 0
+        count = dic.get('messages', 0)
+        # print('队列长度', count)
+        return count
 
-    def delete_queue(self, queue_name):
-        url = f'http://{self.rabbit_host}:15672/api/queues/%2F/{queue_name}'
-        # url = f'http://{self.rabbit_host}/api/queues/%2F/{queue_name}'
-        data = {"vhost": "/", "name": f"{queue_name}", "mode": "delete"}
-        self.req_s.delete(url=url, json=data, auth=(self.rabbit_username, self.rabbit_password))
+    def async_send_message(self, message):
+        """异步发送消息"""
+        self.async_thread_pool.submit(self.send_message, message=message)
 
     def start(self):
         """开始发送消息"""
         for i in range(100):
             message = i
-            # self.send_message(str(message))  # 单进程发送
-            self.async_send_message(message)  # 线程池发送
-
-        ret = wait(fs=self.work_list, timeout=None, return_when=ALL_COMPLETED)
-        print(f"work_list ALL_COMPLETED, ret:{ret}")
-
-        while self.work_list:
-            task = self.work_list[-1]
-            if task.done():
-                self.work_list.remove(task)
-            else:
-                continue
-
-        # print(len(self.work_list))
-        # self.async_send_message('1')
+            self.send_message(str(message))  # 单进程发送
+            # self.async_send_message(message)  # 线程池发送
 
     def Requests(self, ch, method, properties, body):  # 消息处理函数
         print(['X'], body.decode('utf-8'))
         ch.basic_ack(delivery_tag=method.delivery_tag)  # 手动发送ack,如果没有发送,队列里的消息将会发给下一个worker
 
+        print(self.getMessageCount())
+
 
 if __name__ == '__main__':
     start_time = time.time()
-    producer = MqProducer(queue_name='test_queue')
+    producer = MqProducer(queue_name='first_spider')
     producer.start()
-    producer.get_message()
     end_time = time.time()
     total = (end_time - start_time)
     print(total)
-
-    # from retrying import retry
-    # from random import randint
-    #
-    #
-    # @retry(stop_max_attempt_number=3)
-    # def get_random():
-    #     int_r = randint(0, 100)
-    #     if int_r > 0:
-    #         print(f"该随机数等于{int_r}")
-    #         raise IOError("该随机数大于0")
-    #     else:
-    #         return int_r
-    #
-    #
-    # print(f"该随机数等于{get_random()}")

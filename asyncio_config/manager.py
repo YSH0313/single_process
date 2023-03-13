@@ -24,8 +24,8 @@ from config.Basic import Basic
 from concurrent.futures import ThreadPoolExecutor
 from asyncio_config.my_Requests import MyResponse
 from concurrent.futures import wait, ALL_COMPLETED
-from config.settings import PREFETCH_COUNT, TIME_OUT, X_MAX_PRIORITY, Mysql, IS_PROXY, IS_SAMEIP, Asynch, Waiting_time, \
-    Delay_time, max_request, Agent_whitelist, retry_http_codes, UA_PROXY, Auto_clear, message_ttl
+from config.settings import PREFETCH_COUNT, TIME_OUT, IS_PROXY, IS_SAMEIP, Asynch, Waiting_time, Delay_time, \
+    max_request, Agent_whitelist, retry_http_codes, UA_PROXY, Auto_clear, message_ttl
 
 from config.settings import Rabbitmq
 from library_tool.sugars import retrying
@@ -33,21 +33,13 @@ from library_tool.sugars import retrying
 shutdown_lock = threading.Lock()
 
 
-def count_time(func):
-    def clocked(*args, **kwargs):
-        start = time.time()
-        result = func(*args, **kwargs)
-        end = time.time()
-        total_time = end - start
-        print(f'{kwargs.get("callback")}方法运行完成，共计{total_time}秒')
-        return result
-
-    return clocked
-
-
 class LoopGetter(object):
-    def __init__(self):
-        self.parse_thread_pool = ThreadPoolExecutor(Rabbitmq['async_thread_pool_size'])  # 数据处理线程池
+    def __init__(self, custom_settings=None):
+        if custom_settings:
+            for varName, value in custom_settings.items():
+                if varName in globals().keys():
+                    globals()[varName] = value
+        self.parse_thread_pool = ThreadPoolExecutor(PREFETCH_COUNT)  # 数据处理线程池
 
         # 定义一个线程，运行一个事件循环对象，用于实时接收新任务
         self.new_loop = asyncio.new_event_loop()
@@ -90,28 +82,20 @@ class Manager(Basic, LoopGetter):
     custom_settings = {}
 
     def __init__(self):
-        LoopGetter.__init__(self)
         if self.custom_settings:
             Basic.__init__(self, queue_name=self.name, custom_settings=self.custom_settings, class_name='Manager')
+            LoopGetter.__init__(self, custom_settings=self.custom_settings)
             for varName, value in self.custom_settings.items():
-                # s = globals().get(varName)
                 if varName in globals().keys():
                     globals()[varName] = value
         else:
+            LoopGetter.__init__(self)
             Basic.__init__(self, queue_name=self.name, class_name='Manager')
         self.pages = int(sys.argv[1]) if len(sys.argv) > 1 else None
         self.logger.name = logging.getLogger(__name__).name
         self.num = PREFETCH_COUNT
-        self.timeout = TIME_OUT
-        self.x_max_priority = X_MAX_PRIORITY
-        self.message_ttl = message_ttl
-        self.mysql = Mysql
         self.is_proxy = IS_PROXY
         self.is_sameip = IS_SAMEIP
-        self.asynch = Asynch
-        self.waiting_time = Waiting_time
-        self.delay_time = Delay_time
-        self.max_request = max_request
 
     def Environmental_judgment(self):
         if self.operating_system == 'linux' and self.pages and len(sys.argv) > 1:
@@ -154,14 +138,6 @@ class Manager(Basic, LoopGetter):
         # temp_class = getattr(package, self.queue_name.replace('ysh_', ''))
         # self.duixiang = temp_class()
         # self.duixiang = actuator.LoadSpiders()._spiders[spider_name]()
-        if Auto_clear:  # 如果自动清空队列
-            try:
-                self.delete_queue(queue_name=self.queue_name)
-                self.logger.info('The queue has been cleared automatically')
-            except:
-                self.logger.error('The automatic queue clearing failed', exc_info=True)
-                if self.pages:
-                    self.send_close_info()
         self.starttime = self.now_time()
         self.start_time = time.time()
         status = self.open_spider(spider_name=self.name)
@@ -173,10 +149,6 @@ class Manager(Basic, LoopGetter):
                 else:  # 如果不需要异步生产（等生产完之后再开始消费）
                     self.async_thread_pool.submit(self.make_start_request, start_fun=self.start_requests)
                     wait(fs=self.work_list, timeout=None, return_when=ALL_COMPLETED)
-
-                    # start_th(fun_lists=[self.start_requests], queue_name=self.name,
-                    #          signal=self.custom_settings['Breakpoint'])
-
 
             else:  # 如果是默认断点配置
                 if Asynch:  # 如果是异步生产（一边生产一边消费）
@@ -197,12 +169,12 @@ class Manager(Basic, LoopGetter):
         elif status == False:
             return
 
-    async def shutdown_spider(self, spider_name):
+    async def shutdown_spider(self, spider_name: str):
         """监控队列及运行状态"""
         while 1:
             now_time = time.time()
             self.logger.debug(
-                f"It's been {round(now_time - self.last_time, 2)} seconds since the last time I took data from the queue. The remaining number of queues is {self.getMessageCount(queue_name=self.queue_name)}")
+                f"It's been {round(now_time - self.last_time, 2)} seconds since the last time I took data from the queue. The remaining number of queues is {self.getMessageCount()}")
             if self.monitor and self.right_count:
                 pwd = os.getcwd()
                 spider_path = os.path.join(pwd, f'{self.name}.py')
@@ -219,8 +191,8 @@ class Manager(Basic, LoopGetter):
                 self.send_start_info()
                 self.send_close_info()
                 break
-            elif ((now_time - self.last_time >= self.waiting_time) and (
-                    self.getMessageCount(queue_name=self.queue_name) == 0)):
+            elif ((now_time - self.last_time >= Waiting_time) and (
+                    self.getMessageCount() == 0)):
                 if self.Environmental_judgment() and not self.monitor:
                     self.send_close_info()
                 try:
@@ -233,23 +205,10 @@ class Manager(Basic, LoopGetter):
                     self.send_start_info()
                     self.send_close_info()
                 break
-            time.sleep(self.delay_time)
+            self.rm_task()  # 清除已结束的线程
+            time.sleep(Delay_time)
         self.finished_info(self.starttime, self.start_time)  # 完成时的日志打印
         os._exit(0)  # 暂时重新启用，待观察
-
-    @retrying(stop_max_attempt_number=Rabbitmq['max_retries'])  # 重试装饰器
-    def get_message(self, befor_fun='reconnect', befor_parmas='conn'):
-        """消费者"""
-        self.logger.info('开始消费')
-        with self.get_connection() as connection:
-            channel = connection.channel()
-            channel.queue_declare(queue=self.queue_name,
-                                  arguments={'x-max-priority': (Rabbitmq['X_MAX_PRIORITY'] or 0),
-                                             'x-queue-mode': 'lazy', 'x-message-ttl': Rabbitmq['message_ttl']},
-                                  durable=True)
-            channel.basic_qos(prefetch_count=1)  # 让rabbitmq不要一次将超过1条消息发送给work
-            channel.basic_consume(queue=self.queue_name, on_message_callback=self.Requests)
-            channel.start_consuming()
 
     def Requests(self, ch, method, properties, body):
         """消息处理函数"""
@@ -301,7 +260,7 @@ class Manager(Basic, LoopGetter):
         proxy = param[1] if meta.get('proxy') else proxy
         ignore_ip = contents.get('ignore_ip')
         methods = 'POST' if contents.get('method') == 'POST' else 'GET'
-        timeout = timeout if timeout else self.timeout
+        timeout = timeout if timeout else TIME_OUT
         asyncio.run_coroutine_threadsafe(
             self.make_Requests(method=methods, is_encode=is_encode, url=url, body=body,
                                headers=headers, params=params, data=data, json_params=json_params,
@@ -333,6 +292,14 @@ class Manager(Basic, LoopGetter):
             headers['User-Agent'] = await self.get_ua() if UA_PROXY else headers['User-Agent']
         return new_body, proxy, headers, meta
 
+    async def asyn_request(self, method, url, headers, timeout, cookies, is_encode, **kwargs):
+        """异步请求方法"""
+        with async_timeout.timeout(timeout=timeout):
+            async with aiohttp.ClientSession(headers=headers, conn_timeout=timeout, cookies=cookies) as session:
+                async with session.request(method=method, url=URL(url, encoded=True) if is_encode else url, **kwargs) as response:
+                    res = await response.read()
+                    return response, res
+
     async def make_Requests(self, method='GET', url=None, body=None, headers=None, params=None, data=None,
                             json_params=None, cookies=None, timeout=None, callback=None, dont_filter=False,
                             encoding=None, meta=None, level=0, request_info=None, proxy=None, verify_ssl=None,
@@ -348,43 +315,27 @@ class Manager(Basic, LoopGetter):
                     return
             new_body, proxy, headers, meta = await self.request_preprocess(body, url, proxy, is_change, meta, req_id,
                                                                            params, data, json_params, headers)
-            while retry_count < self.max_request:
+
+            while retry_count < max_request:
                 new_body['proxy'] = proxy = proxy if not ignore_ip else None
                 try:
                     self.send_log(req_id=req_id, code='01', log_level='INFO', url=url, message='即将发送请求',
                                   formdata=self.dic2params(params, data, json_params), show_url=meta.get('show_url'))
-                    text = ''
-                    with async_timeout.timeout(timeout=timeout):
-                        async with aiohttp.ClientSession(headers=headers, conn_timeout=timeout,
-                                                         cookies=cookies) as session:
-                            if method == 'GET':
-                                async with session.get(url=URL(url, encoded=True) if is_encode else url, params=params,
-                                                       data=data, json=json_params, headers=headers, proxy=proxy,
-                                                       verify_ssl=verify_ssl, timeout=timeout,
-                                                       allow_redirects=allow_redirects) as response:
-                                    res = await response.read()
-                                    await self.infos(response.status, method, url, req_id, params, data, json_params,
-                                                     meta.get('show_url'))  # 打印日志
-                                    text = await self.deal_code(res=res, body=body, is_file=is_file, encoding=encoding)
+                    response, res = await self.asyn_request(method, url, headers, timeout, cookies, is_encode,
+                                                            params=params, data=data, json=json_params, proxy=proxy,
+                                                            verify_ssl=verify_ssl, allow_redirects=allow_redirects)
+                    # 打印日志
+                    await self.infos(response.status, method, url, req_id, params, data, json_params, meta.get('show_url'))
 
-                            elif method == "POST":
-                                async with session.post(url=URL(url, encoded=True) if is_encode else url, params=params,
-                                                        data=data, json=json_params, headers=headers, proxy=proxy,
-                                                        verify_ssl=verify_ssl, timeout=timeout,
-                                                        allow_redirects=allow_redirects) as response:
-                                    res = await response.read()
-                                    await self.infos(response.status, method, url, req_id, params, data, json_params,
-                                                     meta.get('show_url'))  # 打印日志
-                                    text = await self.deal_code(res=res, body=body, is_file=is_file, encoding=encoding)
-                    if text:
-                        if '您的授权设置可能有问题' in text and '您当前的客户端IP地址为' in text:
-                            raise ProxyError(f'{proxy}代理并发数超限制')
-                    response_last = MyResponse(url=url, headers=response.headers, data=data,
-                                               cookies=response.cookies, meta=meta, retry_count=retry_count,
-                                               text=text, content=res, status_code=response.status,
-                                               request_info=request_info, proxy=proxy, level=level,
-                                               log_info={'req_id': req_id, 'params': params, 'data': data,
-                                                         'json_params': json_params})
+                    text = await self.deal_code(res=res, body=body, is_file=is_file, encoding=encoding)
+
+                    if '您的授权设置可能有问题' in text and '您当前的客户端IP地址为' in text:
+                        raise ProxyError(f'{proxy}代理并发数超限制')
+                    response_last = MyResponse(url=url, headers=response.headers, data=data, cookies=response.cookies,
+                                               meta=meta, retry_count=retry_count, text=text, content=res,
+                                               status_code=response.status, request_info=request_info, proxy=proxy,
+                                               level=level, log_info={'req_id': req_id, 'params': params, 'data': data,
+                                                                      'json_params': json_params})
                     await self.Iterative_processing(method=method, callback=callback,
                                                     response_last=response_last, body=body, level=level,
                                                     retry_count=retry_count, req_id=req_id)
@@ -411,7 +362,7 @@ class Manager(Basic, LoopGetter):
                                                     body=body, level=level, retry_count=retry_count, req_id=req_id)
 
                 except Exception as e:
-                    if (not self.is_proxy) and (self.max_request):
+                    if (not self.is_proxy) and (max_request):
                         retry_count += 1
                         await self.retry(method, url, retry_count, repr(e), new_body, req_id, params, data, json_params,
                                          meta.get('show_url'))
@@ -439,14 +390,17 @@ class Manager(Basic, LoopGetter):
         self.num += 1
 
     async def contarst_data(self, url):
+        """判断是否重复"""
         url_sha1 = self.url2sha1(url)
         t_num = str(int(url_sha1[-2:], 16) % 16)
-        url_sha1 = self.select(table=f't_bidding_filter_{t_num}', columns=['url_sha1'], where=f"url_sha1='{url_sha1}'")
+        url_sha1 = self.select(table=f't_bidding_filter_{t_num}', columns=['url_sha1'],
+                               where=f"""url_sha1='{url_sha1}'""")
         if url_sha1:
             self.logger.info(f'Data already exists, the request has been skipped：{url}')
             return True
 
-    async def deal_code(self, res, body, is_file, encoding):  # 编码处理函数
+    async def deal_code(self, res, body, is_file, encoding):
+        """编码处理函数"""
         if is_file:
             text = None
             return text
@@ -471,7 +425,8 @@ class Manager(Basic, LoopGetter):
             text = await self.cycle_charset(res, body)
             return text
 
-    async def cycle_charset(self, res, body):  # 异常编码处理函数
+    async def cycle_charset(self, res, body):
+        """异常编码处理函数"""
         charset_code_list = ['utf-8', 'gbk', 'gb2312', 'utf-16']
         for code in charset_code_list:
             try:
@@ -482,25 +437,25 @@ class Manager(Basic, LoopGetter):
             except Exception as e:
                 self.logger.error(repr(e) + ' Decoding error ' + body.decode('utf-8'), exc_info=True)
 
-    async def Iterative_processing(self, method, callback, response_last, body, level, retry_count,
-                                   req_id):  # 迭代器及异常状态码处理函数
+    async def Iterative_processing(self, method, callback, response_last, body, level, retry_count, req_id):
+        """迭代器及异常状态码处理函数"""
         mess = json.loads(body.decode('utf-8'))
         if (response_last.status_code != 200) and (response_last.status_code in retry_http_codes) and (
-                retry_count < self.max_request):
+                retry_count < max_request):
             mess['retry_count'] = retry_count = int(retry_count) + 1
             if self.is_proxy:
                 mess['proxy'] = await self.asy_rand_choi_pool()
                 if self.is_sameip:
                     mess['meta']['proxy'] = mess['proxy']
-            if (retry_count < self.max_request):
+            if (retry_count < max_request):
                 self.async_send_message(message=json.dumps(mess))
                 await self.retry(method, response_last.url, str(retry_count),
-                                 f'Wrong status code {response_last.status_code}', str(mess),
+                                 'Wrong status code {status}'.format(status=response_last.status_code), str(mess),
                                  req_id, mess.get('params'), mess.get('data'), mess.get('json_params'),
                                  mess['meta'].get('show_url'))
                 self.exc_count += 1
-            elif (retry_count == self.max_request):
-                self.logger.debug(f'Give up <{body.decode("utf-8")}>')
+            elif (retry_count == max_request):
+                self.logger.debug('Give up <{message}>'.format(message=body.decode('utf-8')))
                 self.fangqi_count += 1
                 response_last.retry_count = retry_count
                 await self.__deal_fun(callback=callback, response_last=response_last)
@@ -516,38 +471,32 @@ class Manager(Basic, LoopGetter):
                         mess['meta']['proxy'] = mess['proxy']
                 self.async_send_message(message=json.dumps(mess))
                 await self.retry(method, response_last.url, str(retry_count),
-                                 f'Other wrong status code {response_last.status_code}', str(mess),
+                                 'Other wrong status code {status}'.format(status=response_last.status_code), str(mess),
                                  req_id, mess.get('params'), mess.get('data'), mess.get('json_params'),
                                  mess['meta'].get('show_url'))
                 self.other_count += 1
             else:
-                self.logger.debug(f'Give up <{body.decode("utf-8")}>')
+                self.logger.debug('Give up <{message}>'.format(message=body.decode('utf-8')))
                 self.fangqi_count += 1
                 response_last.retry_count = retry_count
                 await self.__deal_fun(callback=callback, response_last=response_last)
             return
 
-        if (retry_count == self.max_request):
-            self.logger.debug(f'Give up <{body.decode("utf-8")}>')
+        if (retry_count == max_request):
+            self.logger.debug('Give up <{message}>'.format(message=body.decode('utf-8')))
             self.fangqi_count += 1
             response_last.retry_count = retry_count
         await self.__deal_fun(callback=callback, response_last=response_last)
 
     # @count_time
     async def __deal_fun(self, callback, response_last):
+        """回调函数处理"""
         try:
             if response_last.text:
                 response_last.xpath = Selector(response=response_last).xpath
             if self.__getattribute__(callback)(response=response_last):
                 for c in self.__getattribute__(callback)(response=response_last):
-                    # if c.meta == {}:
                     c.meta['proxy'] = response_last.meta.get('proxy')
-                    # else:
-                    #     c.meta = dict(response_last.meta, **c.meta)
-                    # if int(response_last.level) + 1 > self.x_max_priority:
-                    #     c.level = self.x_max_priority
-                    # else:
-                    #     c.level = int(response_last.level) + 1  # 优先级自动递增，适用yield
                     self.async_send_message(message=c)
         except Exception as e:
             self.exec_count += 1
@@ -564,22 +513,26 @@ class Manager(Basic, LoopGetter):
             #     os._exit(0)
             self.logger.error(e, exc_info=True)
 
-    async def infos(self, status, method, url, req_id, params, data, json_params, show_url):  # 日志函数
+    async def infos(self, status, method, url, req_id, params, data, json_params, show_url):
+        """日志函数"""
         self.request_count += 1
-        self.logger.info(f'Mining ({status}) <{method} {url}>')
+        self.logger.info('Mining ({status}) <{method} {url}>'.format(status=status, method=method, url=url))
         if str(status) == '200':
             self.success_code_count += 1
-            self.logger.debug(f'Catched from <{status} {url}>')
+            self.logger.debug('Catched from <{status} {url}>'.format(status=status, url=url))
             self.send_log(req_id=req_id, code='20', log_level='INFO', url=url, message='请求成功',
                           formdata=self.dic2params(params, data, json_params), show_url=show_url)
         if int(status) >= 400:
             self.send_log(req_id=req_id, code='21', log_level='WARN', url=url, message='http状态码大于等于400',
                           formdata=self.dic2params(params, data, json_params), show_url=show_url)
 
-    async def retry(self, method, url, retry_count, abnormal, message, req_id, params, data, json_params,
-                    show_url):  # 重试日志函数
+    async def retry(self, method, url, retry_count, abnormal, message, req_id, params, data, json_params, show_url):
+        """重试日志函数"""
         self.logger.debug(
-            f'Retrying <{method} {url}> (failed {retry_count} times): {abnormal} {message}')
+            'Retrying <{method} {url}> (failed {retry_count} times): {abnormal}'.format(method=method, url=url,
+                                                                                        retry_count=retry_count,
+                                                                                        abnormal=abnormal) + str(
+                message))
         self.send_log(req_id=req_id, code='25', log_level='WARN', url=url, message=f'第{retry_count}次重试请求',
                       formdata=self.dic2params(params, data, json_params), show_url=show_url)
         self.wrong_count += 1
