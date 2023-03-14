@@ -21,14 +21,10 @@ from yarl import URL
 from scrapy.selector import Selector
 from collections import Iterator
 from config.Basic import Basic
-from concurrent.futures import ThreadPoolExecutor
 from asyncio_config.my_Requests import MyResponse
 from concurrent.futures import wait, ALL_COMPLETED
 from config.settings import PREFETCH_COUNT, TIME_OUT, IS_PROXY, IS_SAMEIP, Asynch, Waiting_time, Delay_time, \
-    max_request, Agent_whitelist, retry_http_codes, UA_PROXY, Auto_clear, message_ttl
-
-from config.settings import Rabbitmq
-from library_tool.sugars import retrying
+    max_request, Agent_whitelist, retry_http_codes, UA_PROXY
 
 shutdown_lock = threading.Lock()
 
@@ -39,7 +35,6 @@ class LoopGetter(object):
             for varName, value in custom_settings.items():
                 if varName in globals().keys():
                     globals()[varName] = value
-        self.parse_thread_pool = ThreadPoolExecutor(PREFETCH_COUNT)  # 数据处理线程池
 
         # 定义一个线程，运行一个事件循环对象，用于实时接收新任务
         self.new_loop = asyncio.new_event_loop()
@@ -142,7 +137,9 @@ class Manager(Basic, LoopGetter):
         self.start_time = time.time()
         status = self.open_spider(spider_name=self.name)
         if status:
-            if 'Breakpoint' in self.custom_settings.keys():  # 如果修改了开启断点参数
+            """
+                暂时停用，或属于逻辑重复代码，待观察
+                if 'Breakpoint' in self.custom_settings.keys():  # 如果修改了开启断点参数
                 if Asynch:  # 如果是异步生产（一边生产一边消费）
                     self.async_thread_pool.submit(self.make_start_request, start_fun=self.start_requests)
 
@@ -150,24 +147,25 @@ class Manager(Basic, LoopGetter):
                     self.async_thread_pool.submit(self.make_start_request, start_fun=self.start_requests)
                     wait(fs=self.work_list, timeout=None, return_when=ALL_COMPLETED)
 
-            else:  # 如果是默认断点配置
-                if Asynch:  # 如果是异步生产（一边生产一边消费）
-                    self.async_thread_pool.submit(self.make_start_request, start_fun=self.start_requests)
+            else:  # 如果是默认断点配置"""
 
-                else:  # 如果不需要异步生产（等生产完之后再开始消费）
-                    self.work_list.append(
-                        self.async_thread_pool.submit(self.make_start_request, start_fun=self.start_requests))
-                    wait(fs=self.work_list, timeout=None, return_when=ALL_COMPLETED)
+            if Asynch:  # 如果是异步生产（一边生产一边消费）
+                self.async_thread_pool.submit(self.make_start_request, start_fun=self.start_requests)
 
-            asyncio.run_coroutine_threadsafe(self.shutdown_spider(spider_name=self.name),
-                                             self.shutdown_loop)  # 开启监控队列状态
+            else:  # 如果不需要异步生产（等生产完之后再开始消费）
+                self.work_list.append(
+                    self.async_thread_pool.submit(self.make_start_request, start_fun=self.start_requests))
+                wait(fs=self.work_list, timeout=None, return_when=ALL_COMPLETED)
+
+            # 开启监控队列状态
+            asyncio.run_coroutine_threadsafe(self.shutdown_spider(spider_name=self.name), self.shutdown_loop)
             self.consumer_status = self.async_thread_pool.submit(self.get_message)  # 开启消费者
-            self.logger.info('Consumer thread open ' + str(self.consumer_status))
+            self.logger.info(f'Consumer thread open {str(self.consumer_status)}')
             self.work_list.append(self.consumer_status)
             wait(fs=self.work_list, timeout=None, return_when=ALL_COMPLETED)
 
         elif status == False:
-            return
+            self.logger.info('爬虫任务启动失败，可能是由于检查爬虫状态导致！')
 
     async def shutdown_spider(self, spider_name: str):
         """监控队列及运行状态"""
@@ -220,12 +218,12 @@ class Manager(Basic, LoopGetter):
             time.sleep(1)
         flag = self.is_json(body.decode('utf-8'))
         if not flag:  # 判断是否为请求消息，如果不是的话
-            self.parse_thread_pool.submit(self.parse_only, body=body.decode('utf-8'))  # 多线程数据处理
+            self.async_thread_pool.submit(self.parse_only, body=body.decode('utf-8'))  # 多线程数据处理
 
             # fun_lists = self.parse_only(body=body.decode('utf-8'))
             # if isinstance(fun_lists, Iterator):
             #     for p in fun_lists:
-            #         self.async_send_message(message=p)
+            #         self.send_message(message=p)
             self.num += 1
         if flag:  # 判断是否为请求消息，如果是的话
             self.make_params(body)
@@ -366,14 +364,14 @@ class Manager(Basic, LoopGetter):
                         retry_count += 1
                         await self.retry(method, url, retry_count, repr(e), new_body, req_id, params, data, json_params,
                                          meta.get('show_url'))
-                        self.logger.error(repr(e) + ' Returning to the queue ' + str(new_body), exc_info=True)
+                        self.logger.error(f'{repr(e)} Returning to the queue {str(new_body)}', exc_info=True)
                     else:
                         retry_count += 1
                         mess = json.loads(body.decode('utf-8'))
                         mess['is_change'] = True
                         mess['retry_count'] = retry_count
-                        self.async_send_message(message=json.dumps(mess))
-                        self.logger.error(repr(e) + ' Returning to the queue ' + str(new_body), exc_info=True)
+                        self.send_message(message=json.dumps(mess), is_thread=True)
+                        self.logger.error(f'{repr(e)} Returning to the queue {str(new_body)}', exc_info=True)
                         break
             else:
                 response_last = MyResponse(url=url, headers={}, data={}, cookies=None, meta=meta,
@@ -420,7 +418,7 @@ class Manager(Basic, LoopGetter):
                     text = str(res, charset_code, errors='replace')
                 return text
             except Exception as e:
-                self.logger.error(repr(e) + ' Decoding error ' + body.decode('utf-8'), exc_info=True)
+                self.logger.error(f'{repr(e)} Decoding error {body.decode("utf-8")}', exc_info=True)
         else:
             text = await self.cycle_charset(res, body)
             return text
@@ -435,7 +433,7 @@ class Manager(Basic, LoopGetter):
             except UnicodeDecodeError:
                 continue
             except Exception as e:
-                self.logger.error(repr(e) + ' Decoding error ' + body.decode('utf-8'), exc_info=True)
+                self.logger.error(f'{repr(e)} Decoding error {body.decode("utf-8")}', exc_info=True)
 
     async def Iterative_processing(self, method, callback, response_last, body, level, retry_count, req_id):
         """迭代器及异常状态码处理函数"""
@@ -448,14 +446,14 @@ class Manager(Basic, LoopGetter):
                 if self.is_sameip:
                     mess['meta']['proxy'] = mess['proxy']
             if (retry_count < max_request):
-                self.async_send_message(message=json.dumps(mess))
+                self.send_message(message=json.dumps(mess), is_thread=True)
                 await self.retry(method, response_last.url, str(retry_count),
-                                 'Wrong status code {status}'.format(status=response_last.status_code), str(mess),
-                                 req_id, mess.get('params'), mess.get('data'), mess.get('json_params'),
+                                 f'Wrong status code {response_last.status_code}', str(mess), req_id,
+                                 mess.get('params'), mess.get('data'), mess.get('json_params'),
                                  mess['meta'].get('show_url'))
                 self.exc_count += 1
             elif (retry_count == max_request):
-                self.logger.debug('Give up <{message}>'.format(message=body.decode('utf-8')))
+                self.logger.debug(f'Give up <{body.decode("utf-8")}>')
                 self.fangqi_count += 1
                 response_last.retry_count = retry_count
                 await self.__deal_fun(callback=callback, response_last=response_last)
@@ -469,21 +467,21 @@ class Manager(Basic, LoopGetter):
                     mess['proxy'] = await self.asy_rand_choi_pool()
                     if self.is_sameip:
                         mess['meta']['proxy'] = mess['proxy']
-                self.async_send_message(message=json.dumps(mess))
+                self.send_message(message=json.dumps(mess), is_thread=True)
                 await self.retry(method, response_last.url, str(retry_count),
-                                 'Other wrong status code {status}'.format(status=response_last.status_code), str(mess),
-                                 req_id, mess.get('params'), mess.get('data'), mess.get('json_params'),
+                                 f'Other wrong status code {response_last.status_code}', str(mess), req_id,
+                                 mess.get('params'), mess.get('data'), mess.get('json_params'),
                                  mess['meta'].get('show_url'))
                 self.other_count += 1
             else:
-                self.logger.debug('Give up <{message}>'.format(message=body.decode('utf-8')))
+                self.logger.debug(f'Give up <{body.decode("utf-8")}>')
                 self.fangqi_count += 1
                 response_last.retry_count = retry_count
                 await self.__deal_fun(callback=callback, response_last=response_last)
             return
 
         if (retry_count == max_request):
-            self.logger.debug('Give up <{message}>'.format(message=body.decode('utf-8')))
+            self.logger.debug(f'Give up <{body.decode("utf-8")}>')
             self.fangqi_count += 1
             response_last.retry_count = retry_count
         await self.__deal_fun(callback=callback, response_last=response_last)
@@ -497,7 +495,11 @@ class Manager(Basic, LoopGetter):
             if self.__getattribute__(callback)(response=response_last):
                 for c in self.__getattribute__(callback)(response=response_last):
                     c.meta['proxy'] = response_last.meta.get('proxy')
-                    self.async_send_message(message=c)
+                    callname = c.callback if isinstance(c.callback, str) else c.callback.__name__
+                    if not c.level:
+                        c.level = self.callback_map[callback]+1 if callback != callname else self.callback_map[callback]
+                    # print(f'{callback}优先级：{c.level}')
+                    self.send_message(message=c, is_thread=True)
         except Exception as e:
             self.exec_count += 1
             self.send_log(req_id=response_last.log_info['req_id'], code='32', log_level='ERROR', url=response_last.url,
@@ -516,10 +518,10 @@ class Manager(Basic, LoopGetter):
     async def infos(self, status, method, url, req_id, params, data, json_params, show_url):
         """日志函数"""
         self.request_count += 1
-        self.logger.info('Mining ({status}) <{method} {url}>'.format(status=status, method=method, url=url))
+        self.logger.info(f'Mining ({status}) <{method} {url}>')
         if str(status) == '200':
             self.success_code_count += 1
-            self.logger.debug('Catched from <{status} {url}>'.format(status=status, url=url))
+            self.logger.debug(f'Catched from <{status} {url}>')
             self.send_log(req_id=req_id, code='20', log_level='INFO', url=url, message='请求成功',
                           formdata=self.dic2params(params, data, json_params), show_url=show_url)
         if int(status) >= 400:
@@ -528,11 +530,7 @@ class Manager(Basic, LoopGetter):
 
     async def retry(self, method, url, retry_count, abnormal, message, req_id, params, data, json_params, show_url):
         """重试日志函数"""
-        self.logger.debug(
-            'Retrying <{method} {url}> (failed {retry_count} times): {abnormal}'.format(method=method, url=url,
-                                                                                        retry_count=retry_count,
-                                                                                        abnormal=abnormal) + str(
-                message))
+        self.logger.debug(f'Retrying <{method} {url}> (failed {retry_count} times): {abnormal+str(message)}')
         self.send_log(req_id=req_id, code='25', log_level='WARN', url=url, message=f'第{retry_count}次重试请求',
                       formdata=self.dic2params(params, data, json_params), show_url=show_url)
         self.wrong_count += 1

@@ -46,7 +46,7 @@ class ParentObj(SpiderLog, SingleTool):
     name = None
     spider_sign = None
 
-    def __init__(self, key='', custom_settings=None):
+    def __init__(self, custom_settings=None, **kwargs):
         SpiderLog.__init__(self)
         SingleTool.__init__(self)
         if custom_settings:
@@ -170,7 +170,7 @@ class ParentObj(SpiderLog, SingleTool):
 
 class MysqlDb(ParentObj):
     def __init__(self, custom_settings=None, **kwargs):
-        ParentObj.__init__(self, custom_settings=custom_settings)
+        super().__init__(custom_settings=custom_settings, **kwargs)
         if custom_settings:
             for varName, value in custom_settings.items():
                 s = globals().get(varName)
@@ -231,7 +231,7 @@ class MysqlDb(ParentObj):
                 # if conn:
                 #     conn.close()
 
-    def insert(self, table, data, if_update=False):
+    def insert(self, table, data, if_update=False, is_info=True):
         columns = ', '.join([f"`{i}`" for i in data.keys()])
         placeholders = ', '.join(['%s'] * len(data))
         query = f"INSERT IGNORE INTO `{table}` ({columns}) VALUES ({placeholders});"
@@ -240,8 +240,9 @@ class MysqlDb(ParentObj):
             update = ', '.join([f"`{key}` = %s" for key in data.keys()])
             query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders}) ON DUPLICATE KEY UPDATE {update}"
             sql = query % tuple([f"'{i}'" if i else i for i in data.values()] * 2)
-        self.logger.info(sql)
-        self.logger.info('===========================================================')
+        if is_info:
+            self.logger.info(sql)
+            self.logger.info('===========================================================')
         return self.execute(query, tuple(data.values()))
 
     def update(self, table, set_data, where=None):
@@ -311,12 +312,13 @@ class MysqlDb(ParentObj):
 
 class KafkaDb(ParentObj):
     def __init__(self, custom_settings=None, **kwargs):
-        ParentObj.__init__(self, custom_settings=custom_settings)
+        super().__init__(custom_settings=custom_settings, **kwargs)
         if custom_settings:
             for varName, value in custom_settings.items():
                 s = globals().get(varName)
                 if s:
                     globals()[varName] = value
+
         if kafka_connection:
             self.producer = KafkaProducer(bootstrap_servers=kafka_servers['server'], max_request_size=3145728,
                                           api_version=(0, 10, 2))
@@ -399,9 +401,9 @@ class KafkaDb(ParentObj):
 
 
 class RedisDb(ParentObj):
-    def __init__(self, key='', custom_settings=None):
+    def __init__(self, key='', custom_settings=None, **kwargs):
+        super().__init__(custom_settings=custom_settings, **kwargs)
         self.key = 'ysh_' + key
-        ParentObj.__init__(self, custom_settings=custom_settings)
         if custom_settings:
             for varName, value in custom_settings.items():
                 s = globals().get(varName)
@@ -462,8 +464,8 @@ class RedisDb(ParentObj):
 
 
 class Cluster(MysqlDb, KafkaDb, RedisDb):
-    def __init__(self, key='', custom_settings=None):
-        super(Cluster, self).__init__(key=key, custom_settings=custom_settings)
+    def __init__(self, key='', custom_settings=None, **kwargs):
+        super().__init__(key=key, custom_settings=custom_settings, **kwargs)
 
 
 if __name__ == '__main__':
