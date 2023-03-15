@@ -4,8 +4,8 @@
 # import inspect
 # import threading
 # import logging
-# from MQ.mq_upgrade import MqProducer
-# from middleware.Cluster import RedisDb
+# from MQ.mq import Mq
+# from config.Cluster import Cluster
 #
 # def _async_raise(tid, exctype):
 #
@@ -59,7 +59,7 @@
 #             data = q.get()
 #             queueLock.release()
 #             # print("%s processing %s" % (threadName, data))
-#             mq = MqProducer(queue_name)
+#             mq = Mq(queue_name)
 #             start_reuests = fun_name()
 #             for i in start_reuests:
 #                 mq.send_mqdata(i, is_thread=True)
@@ -97,12 +97,7 @@
 #         for t in threads:
 #             t.join()
 #         print("退出主线程")
-#     # total = MqProducer(queue_name).send_channel_count.method.message_count
-#     channel = MqProducer(queue_name).get_connection().channel()
-#     total = channel.queue_declare(queue=queue_name,
-#                               arguments={'x-max-priority': (Rabbitmq['X_MAX_PRIORITY'] or 0),
-#                                          'x-queue-mode': 'lazy', 'x-message-ttl': Rabbitmq['message_ttl']},
-#                               durable=True)
+#     total = Mq(queue_name).send_channel_count.method.message_count
 #     Breakpoint = None
 #     if signal != None:
 #         Breakpoint = signal
@@ -177,7 +172,7 @@
 #     elif fun_lists[0].__name__ == 'consumer':
 #         fun_lists[0](key)
 #     else:
-#         cl = RedisDb()
+#         cl = Cluster()
 #         total, key_len = cl.get_len(key[0])
 #         Breakpoint = None
 #         if signal != None:

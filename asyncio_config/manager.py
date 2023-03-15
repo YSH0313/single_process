@@ -23,7 +23,7 @@ from collections import Iterator
 from config.Basic import Basic
 from asyncio_config.my_Requests import MyResponse
 from concurrent.futures import wait, ALL_COMPLETED
-from config.settings import PREFETCH_COUNT, TIME_OUT, IS_PROXY, IS_SAMEIP, Asynch, Waiting_time, Delay_time, \
+from settings import PREFETCH_COUNT, TIME_OUT, IS_PROXY, IS_SAMEIP, Asynch, Waiting_time, Delay_time, \
     max_request, Agent_whitelist, retry_http_codes, UA_PROXY
 
 shutdown_lock = threading.Lock()
@@ -400,7 +400,7 @@ class Manager(Basic, LoopGetter):
     async def deal_code(self, res, body, is_file, encoding):
         """编码处理函数"""
         if is_file:
-            text = None
+            text = ''
             return text
         charset_code = chardet.detect(res[0:1])['encoding']
         # charset_code = self.deal_re(self.charset_code.search(str(res)))

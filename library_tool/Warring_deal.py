@@ -1,6 +1,7 @@
+import os
 import time
 import pymysql
-from library_tool.email_sender.msgutils import send_mail
+from email_sender.msgutils import send_mail
 
 Mysql = {
     'MYSQL_HOST': 'aliyun-rds-qdb.bl-ai.com',

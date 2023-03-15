@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 import logging
-from logging import handlers
-from random import choice
-from config.settings import log_path, log_level
+from settings import log_path, log_level
 
 """
 format参数值说明：
@@ -59,7 +57,7 @@ class SpiderLog(object):
                 console.setFormatter(format_str)  # 设置屏幕上显示的格式
                 self.logger.addHandler(console)  # 把屏幕对象加到logger里
 
-            th = logging.FileHandler(filename=log_path+f'/{self.path_name}.log', mode='w', encoding='utf-8')
+            th = logging.FileHandler(filename=log_path+'/{spider_name}.log'.format(spider_name=self.path_name), mode='w', encoding='utf-8')
             th.setFormatter(format_file)  # 设置文件里写入的格式
             self.logger.addHandler(th)  # 把对象加到logger里
 

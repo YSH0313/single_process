@@ -19,85 +19,99 @@ from decorator import decorator
 #
 #     return loop(*arg, **kwar)
 
+class RetryingError(Exception):
+    def __init__(self, message):
+        self.message = message
 
 
-@decorator
-def retrying(fun_name, stop_max_attempt_number=3, *ar, **kwar):  # 重试装饰器
-    def retr(*args, **kwargs):
-        num = 0
-        while num < stop_max_attempt_number:
-            try:
+def count_time(func):
+    def clocked(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        total_time = end - start
+        print(f'{func.__name__}方法运行完成，共计{total_time}秒')
+        return result
+
+    return clocked
+
+
+def retrying(**kwar):  # 重试装饰器
+    stop_max_attempt_number = 3
+    if 'stop_max_attempt_number' in kwar.keys():
+        stop_max_attempt_number = kwar.get('stop_max_attempt_number')
+
+    def retr(func):
+        def retry(*args, **kwargs):
+            num = 0
+            while num < stop_max_attempt_number:
                 try:
-                    return fun_name(*args, **kwargs)
+                    try:
+                        return func(*args, **kwargs)
+                    except:
+                        if 'befor_fun' in kwar.keys():
+                            befor_fun_name = kwar.get('befor_fun')
+                            befor_fun_parm = kwar.get('befor_parmas')
+                            if befor_fun_parm:
+                                if isinstance(befor_fun_name, str):
+                                    args[0].__getattribute__(befor_fun_name)(befor_fun_parm)
+                                elif not isinstance(befor_fun_name, str):
+                                    args[0].__getattribute__(befor_fun_name.__name__)(befor_fun_parm)
+                            elif not befor_fun_parm:
+                                if callable(befor_fun_name):
+                                    args[0].__getattribute__(befor_fun_name.__name__)()
+                                elif isinstance(befor_fun_name, str):
+                                    args[0].__getattribute__(befor_fun_name)()
+                        return func(*args, **kwargs)
                 except:
-                    if 'befor_fun' in kwargs.keys():
-                        befor_fun_name = kwargs.get('befor_fun')
-                        befor_fun_parm = kwargs.get('befor_parmas')
-                        if isinstance(befor_fun_parm, str):
-                            args[0].__getattribute__(befor_fun_name)(befor_fun_parm)
-                        elif isinstance(befor_fun_parm, object):
-                            befor_fun_name = kwargs.get('befor_fun').__name__
-                            befor_fun_parm = kwargs.get('befor_parmas').__name__
-                            args[0].__getattribute__(befor_fun_name)(args[0].__getattribute__(befor_fun_parm)())
+                    num += 1
+                    if num == stop_max_attempt_number:
+                        import traceback
+                        traceback.print_exc()
+            else:
+                raise RetryingError(f'重试次数超过{stop_max_attempt_number}次！')
 
-                    return fun_name(*args, **kwargs)
-            except:
-                num += 1
-                if num == stop_max_attempt_number:
-                    import traceback
-                    traceback.print_exc()
-        else:
-            print(f'重试次数超过{stop_max_attempt_number}次！')
+        return retry
 
-    if 'after_fun' in kwar.keys():
-        after_fun_name = kwar.get('after_fun')
-        after_fun_parm = kwar.get('after_parmas')
-        if isinstance(after_fun_parm, str):
-            ar[0].__getattribute__(after_fun_name)(after_fun_parm)
-        elif isinstance(after_fun_parm, object):
-            after_fun_name = kwar.get('befor_fun').__name__
-            after_fun_parm = kwar.get('befor_parmas').__name__
-            ar[0].__getattribute__(after_fun_name)(ar[0].__getattribute__(after_fun_parm)())
-
-    return retr(*ar, **kwar)
+    return retr
 
 
 if __name__ == '__main__':
 
-    # class ceshi(object):
-    #
-    #     def get_conn(self):
-    #         return 'conn'
-    #
-    #     def befor_fun(self, a):
-    #         print(f'{a}, 111')
-    #
-    #     def after_fun(self, b):
-    #         print(f'{b}, 222')
-    #
-    #     @retrying(stop_max_attempt_number=5)
-    #     def get_random(self, **kwargs):
-    #         int_r = randint(0, 100)
-    #         if int_r > 0:
-    #             print(f"该随机数等于{int_r}")
-    #             raise IOError("该随机数大于0")
-    #         else:
-    #             return int_r
-    #
-    #
-    # ce = ceshi()
-    # # print(f"111,  {ce.get_random(befor_fun=ce.befor_fun, befor_parmas=ce.get_conn)}")
-    # print(f"111,  {ce.get_random(befor_fun='befor_fun', befor_parmas='get_conn')}")
+    class ceshi(object):
 
-    # @loopgenerator
-    def gen_ceshi():
-        for i in range(100):
-            yield i
+        def get_conn(self):
+            return 'conn'
+
+        def befor_fun(self, a):
+            print(f'{a}, 111')
+
+        def after_fun(self, b):
+            print(f'{b}, 222')
+
+        @retrying(stop_max_attempt_number=5, befor_fun='befor_fun', befor_parmas='get_conn')
+        def get_random(self):
+            int_r = randint(0, 100)
+            if int_r > 0:
+                print(f"该随机数等于{int_r}")
+                raise IOError("该随机数大于0")
+            else:
+                return int_r
 
 
-    gen_len = len(list(gen_ceshi()))
-    while gen_len:
-        for i in gen_ceshi():
-            print('11111', i)
-            gen_len -= 1
-        time.sleep(1)
+    ce = ceshi()
+    # print(f"111,  {ce.get_random(befor_fun=ce.befor_fun, befor_parmas=ce.get_conn)}")
+    print(f"111,  {ce.get_random()}")
+
+    # # @loopgenerator
+    # def gen_ceshi():
+    #     for i in range(100):
+    #         yield i
+    #
+    #
+    # gen_len = len(list(gen_ceshi()))
+    # while gen_len:
+    #     for i in gen_ceshi():
+    #         print('11111', i)
+    #         gen_len -= 1
+    #     time.sleep(1)

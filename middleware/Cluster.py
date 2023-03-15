@@ -16,11 +16,11 @@ import datetime
 from items import *
 from kafka import KafkaProducer
 from datetime import datetime, date
-from library_tool.file_strem.Stream import File_Type
+from filestream_y.FileStream_y import stream_type
 from rediscluster import RedisCluster
 from config.spider_log import SpiderLog
 from asyncio_config.my_Requests import MyRequests, MyFormRequests
-from config.settings import REDIS_HOST_LISTS, Mysql, redis_connection, kafka_servers, kafka_connection, access_key_id, \
+from settings import REDIS_HOST_LISTS, Mysql, redis_connection, kafka_servers, kafka_connection, access_key_id, \
     access_key_secret, bucket_name, endpoint
 
 import re
@@ -145,7 +145,7 @@ class ParentObj(SpiderLog, SingleTool):
         if len(data) < 10:
             return url
         oss_bucket = self.get_bucket()
-        stream = File_Type.stream_type(data, header)
+        stream = stream_type(data, header)
         if not stream and not custom:
             suffix_list = ['.doc', '.docx', '.xlr', '.xls', '.xlsx', '.pdf', '.txt', '.jpg', '.png', '.rar', '.zip']
             for i in suffix_list:

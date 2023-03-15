@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import time
 import re
+import os
 
 import json
 import logging
@@ -35,42 +36,9 @@ class Basic(Cluster, MqProducer, Proxy_midddwaer):
 
     def send_start_info(self):
         pass
-        # pwd = os.getcwd()
-        # spider_path = os.path.join(pwd, f'{self.name}.py')
-        # url = 'http://8.140.146.196:8889/liuqingchuan'
-        # data = {
-        #     'type': 'update_status',
-        #     'start': True,
-        #     'group_name': 'kaifa',
-        #     'task_name': spider_path,
-        #     'start_time': self.now_time()
-        # }
-        # try:
-        #     self.logger.info(f'表单信息：{data}')
-        #     response = requests.request("POST", url, data=json.dumps(data))
-        #     self.logger.info(f'开始信号状态码：{response.status_code}')
-        # except Exception as e:
-        #     self.logger.error('错误信息', exc_info=True)
 
     def send_close_info(self):
         pass
-        # pwd = os.getcwd()
-        # spider_path = os.path.join(pwd, f'{self.name}.py')
-        # url = 'http://8.140.146.196:8889/liuqingchuan'
-        # data = {
-        #     'type': 'update_status',
-        #     'finsh': True,
-        #     'group_name': 'kaifa',
-        #     'task_name': spider_path,
-        #     'end_time': self.now_time(),
-        #     'new_data': self.right_count
-        # }
-        # try:
-        #     self.logger.info(f'表单信息：{data}')
-        #     response = requests.post(url=url, data=json.dumps(data))
-        #     self.logger.info(f'当前进程号为：{os.getpid()}，结束信号状态码：{response.status_code}')
-        # except Exception as e:
-        #     self.logger.error('错误信息', exc_info=True)
 
     def finished_info(self, starttime, start_time, exec_info=False):
         Total_time = time.time() - start_time

@@ -2,22 +2,17 @@
 import re
 import os
 import json
-import pika
-import socket
 import aiohttp
 import asyncio
 import logging
-import chardet  # 字符集检测
 import pdfminer
-import actuator
 import concurrent.futures
 from itertools import chain
 from collections import Iterator
 from config.Basic import Basic
-from asyncio_config.th_read import *
 # from config.proxys import self.asy_rand_choi_pool
 from asyncio_config.my_Requests import MyResponse
-from config.settings import PREFETCH_COUNT, TIME_OUT, X_MAX_PRIORITY, Mysql, IS_PROXY, IS_SAMEIP, Asynch, Waiting_time, Delay_time, max_request, Agent_whitelist, retry_http_codes
+from settings import PREFETCH_COUNT, TIME_OUT, X_MAX_PRIORITY, Mysql, IS_PROXY, IS_SAMEIP, Asynch, Waiting_time, Delay_time, max_request, Agent_whitelist, retry_http_codes
 
 # socket.timeout = TIME_OUT
 logging.getLogger("root").setLevel(logging.WARNING)

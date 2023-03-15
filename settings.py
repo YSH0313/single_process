@@ -61,9 +61,6 @@ Rabbitmq = {
     'port': 5672,
     'max_retries': 3,  # 最大重连次数
     'async_thread_pool_size': 4,  # 异步发送线程池
-    'pool_size': 10,  # 连接池参数
-    'message_ttl': 86400000,  # 消息存活有效期，过期删除消息
-    'X_MAX_PRIORITY': 15
 }
 message_ttl = 86400000
 Auto_clear = True  # 重启是否自动清空队列
@@ -93,4 +90,3 @@ access_key_secret = 'yours'
 bucket_name = 'yours'
 endpoint = 'yours'  # 外网
 # endpoint = 'oss-cn-beijing-internal.aliyuncs.com'  # 内网
-

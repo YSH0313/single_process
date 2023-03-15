@@ -3,7 +3,6 @@
 # @Date: 2023-02-23- 09:56:50
 # @Version: 1.0.0
 # @Description: rabbitmq队列中间件
-import asyncio
 import sys
 import time
 import pika
@@ -11,12 +10,12 @@ import json
 import requests
 import threading
 from queue import Queue
-from library_tool.sugars import retrying, count_time
-from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED
+from library_tool.sugars import retrying
+from concurrent.futures import ThreadPoolExecutor
 
 from items import *
 from asyncio_config.my_Requests import MyFormRequests, MyRequests
-from config.settings import Rabbitmq, message_ttl, Auto_clear, X_MAX_PRIORITY
+from settings import Rabbitmq, message_ttl, Auto_clear, X_MAX_PRIORITY
 
 
 class MqProducer:
@@ -26,10 +25,10 @@ class MqProducer:
                 s = globals().get(varName)
                 if s:
                     globals()[varName] = value
-        self.rabbit_username = Rabbitmq.get('username')  # 连接mq的各项参数
-        self.rabbit_password = Rabbitmq.get('password')  # 连接mq的各项参数
-        self.rabbit_host = Rabbitmq.get('host')  # 连接mq的各项参数
-        self.rabbit_port = Rabbitmq.get('port')  # 连接mq的各项参数
+        self.rabbit_username = Rabbitmq['username']  # 连接mq的各项参数
+        self.rabbit_password = Rabbitmq['password']  # 连接mq的各项参数
+        self.rabbit_host = Rabbitmq['host']  # 连接mq的各项参数
+        self.rabbit_port = Rabbitmq['port']  # 连接mq的各项参数
         self.vhost_check = '%2F'  # 连接mq的各项参数
         self.async_thread_pool = ThreadPoolExecutor()  # 线程池
         self.connections = Queue(maxsize=10)  # 连接池
@@ -45,8 +44,6 @@ class MqProducer:
             self.delete_queue()
 
         self.send_channel = self.conn()
-
-        self.get_channel = self.conn()
 
         self.thread_channel = self.conn()
 
@@ -125,13 +122,16 @@ class MqProducer:
         """重新连接后放到连接池里"""
         self.connections.put(connection)
 
-    def reconnect(self, connection):
+    def reconnect(self, conn_user):
         """重连机制"""
         # print('开始重连')
         try:
-            connection.close()
-            connection = self.conn()
-            self.return_connection(connection)
+            if conn_user == 'get_message':
+                connection = self.conn()
+                self.return_connection(connection)
+            elif conn_user == 'send_message':
+                self.send_channel = self.conn()
+                self.thread_channel = self.conn()
         except:
             pass
 
@@ -175,8 +175,8 @@ class MqProducer:
         elif isinstance(message, str) or isinstance(message, int):
             return str(message), 0
 
-    @retrying(stop_max_attempt_number=Rabbitmq['max_retries'])  # 重试装饰器
-    def send_message(self, message, is_thread=False, befor_fun=reconnect, befor_parmas=conn):
+    @retrying(stop_max_attempt_number=Rabbitmq['max_retries'], befor_fun=reconnect, befor_parmas='send_message')  # 重试装饰器
+    def send_message(self, message, is_thread=False):
         """生产者"""
         message, level = self.make_data(message)
         channel = self.send_channel
@@ -186,8 +186,8 @@ class MqProducer:
                                         properties=pika.BasicProperties(priority=level, delivery_mode=1))
         # print(f"已发送消息：{message}, {time.time()}")
 
-    @retrying(stop_max_attempt_number=Rabbitmq['max_retries'])  # 重试装饰器
-    def get_message(self, befor_fun=reconnect, befor_parmas=conn):
+    @retrying(stop_max_attempt_number=Rabbitmq['max_retries'], befor_fun=reconnect, befor_parmas='get_message')  # 重试装饰器
+    def get_message(self):
         """消费者"""
         with self.get_connection() as channel:
             channel.basic_qos(prefetch_count=1)  # 让rabbitmq不要一次将超过1条消息发送给work
@@ -214,8 +214,8 @@ class MqProducer:
     def rrr(self):
         self.async_thread_pool.submit(self.start)
         self.async_thread_pool.submit(self.get_message)
-        print('==================================================')
-        self.async_thread_pool.submit(self.start, is_thread=True)
+        # print('==================================================')
+        # self.async_thread_pool.submit(self.start, is_thread=True)
 
 
 if __name__ == '__main__':

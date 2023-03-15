@@ -18,19 +18,27 @@ import datetime
 import subprocess
 import dateparser
 import pdfplumber
+import numpy as np
 import urllib.parse
 from math import ceil
 import dateutil.parser
+import dateutil.parser
 import pdfminer.psparser
 from urllib import parse
+import demjson3 as demjson
 from string import Template
+from datetime import datetime
 from jsonpath import jsonpath
 from dateutil.parser import parse
 from scrapy.selector import Selector
+from dateutil.parser import parse as pp
 from xml.sax.saxutils import unescape, escape
-
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
+from binascii import *
+from filestream_y.FileStream_y import stream_type
+from library_tool.ocrutils import RecoFactory
+
 
 class SingleTool(object):
 
@@ -140,6 +148,34 @@ class SingleTool(object):
                 return None
         except:
             return None
+
+    def is_today(self, t1, t2, tz_count=28800):
+        """
+        tz_count表示当前时区与UTC0时区的时间差（秒）
+        判断两个时间戳是否是同一天
+        """
+        if int((int(t1) + int(tz_count)) / 86400) == int((int(t2) + int(tz_count)) / 86400):
+            return True
+        else:
+            return False
+
+    def time_step(self, start_time, end_time, step=3600):  # step是间隔时间，单位是秒
+        # 这里是上面的字符串时间格式(可以改)
+        fmt = '%Y-%m-%d %H:%M:%S'
+
+        t1 = datetime.strptime(self.date_format(start_time), fmt)
+        t2 = datetime.strptime(self.date_format(end_time), fmt)
+
+        un_time_1 = time.mktime(t1.timetuple())
+        un_time_2 = time.mktime(t2.timetuple())
+
+        if self.is_today(un_time_1, un_time_2):
+            time_difference = (t2 - t1).total_seconds()
+            if int(time_difference) > step:
+                return False
+            return time_difference
+        else:
+            return True
 
     def date_refix(self, str_date):
         flag = isinstance(str_date, list)
@@ -549,7 +585,7 @@ class SingleTool(object):
         fp1.close()
         ctx2 = execjs.compile(js)
         params = list(kwargs.values()) if len(list(kwargs.values())) > 1 and len(list(kwargs.values())) != 0 else \
-        list(kwargs.values())[0]
+            list(kwargs.values())[0]
         data = (ctx2.call(function_name, params))
         return data
 
@@ -620,7 +656,7 @@ class SingleTool(object):
     def rs_server(self, html, cookies, link, js_path=r'js/rs_server/encrypt.js'):
         import sys, os
         sys.path.append(os.path.abspath(os.path.dirname(__file__)).split('js')[0])
-        js_path = os.path.join(os.path.abspath(os.path.dirname(__file__)).split('config')[0], js_path)
+        js_path = os.path.join(os.path.abspath(os.path.dirname(__file__)).split('library_tool')[0], js_path)
         html = base64.b64encode(html).decode('utf-8')
         command = f'/usr/local/bin/node {js_path} {html} "{cookies}" {link}'
         # print(command)
@@ -658,3 +694,22 @@ class SingleTool(object):
         data = demjson.decode(repr(data).replace(fuhao, ''))
         return data
 
+    def ocr_result(self, file_bytes):
+        if len(file_bytes) > 10:
+            stream = stream_type(file_bytes)
+            result = []
+            if stream == 'pdf' or stream == 'jpg' or stream == 'png' or stream == 'doc'or stream == 'docx':
+                result = RecoFactory.reco_url(file_bytes, stream)
+            return result
+        else:
+            return []
+
+    def check_fileurl(self, url):
+        suffix_list = ['.doc', '.docx', '.xlr', '.xls', '.xlsx', '.pdf', '.txt', '.jpg', '.png', '.rar', '.zip']
+        for i in suffix_list:
+            if url.endswith(i):
+                return i
+            elif not url.endswith(i) and i != suffix_list[-1]:
+                continue
+            else:
+                return False

@@ -15,7 +15,7 @@ import pymysql
 import hashlib
 import logging
 import asyncio
-import demjson
+import demjson3 as demjson
 import requests
 import datetime
 import numpy as np
@@ -31,7 +31,6 @@ from scrapy.selector import Selector
 # from parsel import Selector
 
 sys.path.append('/root/shaohang/single_process/config')
-# from config.proxys import rand_choi_pool
 
 sys.path.append('/root/shaohang/single_process/asyncio_config')
 from asyncio_config.manager import Manager

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import ssl
 import smtplib
-from config.settings import EMAIL_CONFIG
+from settings import EMAIL_CONFIG
 from email.mime.text import MIMEText
 from email.header import Header
 
