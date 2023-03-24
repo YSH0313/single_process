@@ -80,7 +80,7 @@ def get_path(spider_name: str, file_dir: str):
     :param file_dir: 爬虫文件目录
     :return: 爬虫目录， 爬虫文件路径， 使用者目录
     """
-    base_path = '../spider'
+    base_path = 'spider'
     current_path = os.path.join(os.getcwd(), base_path)
     spider_path = os.path.join(current_path, file_dir)
     file_path = os.path.join(spider_path, f'{spider_name}.py')
