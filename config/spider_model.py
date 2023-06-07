@@ -20,7 +20,7 @@ from config.all_config import *
 
 class {{ Class_name }}Spider(Manager):
     name = '{{ model }}'{{ spider_sign }}
-    
+
     def __init__(self):
         Manager.__init__(self)
         # self.online = True
@@ -87,7 +87,7 @@ def get_path(spider_name: str, file_dir: str):
     spider_relative_path = f'{file_dir}/{spider_name}.py'
     if file_dir.endswith('/') or file_dir.endswith('\\'):
         spider_relative_path = f'{file_dir}{spider_name}.py'
-    owner_path = os.path.join('../spider', spider_relative_path)
+    owner_path = os.path.join(base_path, spider_relative_path)
     return spider_path, file_path, owner_path
 
 
@@ -103,7 +103,7 @@ def save_info(spider_name: str, spider_path: str, pages: int, remarks: str, sign
     :return: 保存爬虫信息到mysql
     """
     online_path = os.path.join('/home/bailian/single_process/', owner_path)
-    register_spider(spider_path=online_path, owner=p.get_pinyin(owner, ''))
+    # register_spider(spider_path=online_path, owner=p.get_pinyin(owner, ''))
     log_path_lats = os.path.join(log_path, f'{spider_name}.log')
     data = {
         'spider_name': spider_name,
@@ -155,18 +155,20 @@ def production(spider_name: str, is_increment: bool, pages: int, owner: str, rem
             judge = input('是否覆盖(y/n)?')
             if judge == 'y':
                 write_file(spider_name, file_path, sign)
+                print('创建爬虫文件\033[1;31;0m', spider_name, '\033[0m完成')
                 break
             if judge == 'n':
+                print('爬虫文件\033[1;31;0m', spider_name, '\033[0m未创建')
                 break
             else:
                 pass
     else:
-        os.makedirs(spider_path)
+        if not os.path.exists(spider_path):
+            os.makedirs(spider_path)
         write_file(spider_name, file_path, sign)
         if is_increment:
             save_info(spider_name, file_path, pages, remarks, sign, owner, owner_path)
-
-    print('创建爬虫文件\033[1;31;0m', spider_name, '\033[0m完成')
+        print('创建爬虫文件\033[1;31;0m', spider_name, '\033[0m完成')
 
 
 if __name__ == '__main__':
