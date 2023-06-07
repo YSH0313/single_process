@@ -1,2 +1,2 @@
 from config.spider_model import production
-production('zhaoxun_chengdudongguan', True, 5, '袁少航', '成都东部新区管理委员会', 'ysh_spiders/chengdudongguan/')
+production('my_first', True, 5, '用户', '第一个爬虫', 'your_spider/my_first/')
