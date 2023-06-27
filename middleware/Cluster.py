@@ -21,7 +21,7 @@ from rediscluster import RedisCluster
 from config.spider_log import SpiderLog
 from asyncio_config.my_Requests import MyRequests, MyFormRequests
 from settings import REDIS_HOST_LISTS, Mysql, redis_connection, kafka_servers, kafka_connection, access_key_id, \
-    access_key_secret, bucket_name, endpoint
+    access_key_secret, bucket_name, endpoint, IS_INSERT
 
 import re
 from middleware.pymysqlpool.pymysqlpool import ConnectionPool
@@ -176,15 +176,16 @@ class MysqlDb(ParentObj):
                 s = globals().get(varName)
                 if s:
                     globals()[varName] = value
-        self.host = Mysql['MYSQL_HOST']
-        self.port = Mysql['PORT']
-        self.user = Mysql['MYSQL_USER']
-        self.password = Mysql['MYSQL_PASSWORD']
-        self.db = Mysql['MYSQL_DBNAME']
-        # self.conn = None
-        self.pool = self.create_pool()
-        self.condition_re = re.compile('(.*?)\\(')
-        self.params_re = re.compile('\\((.*?)\\)')
+        if IS_INSERT:
+            self.host = Mysql['MYSQL_HOST']
+            self.port = Mysql['PORT']
+            self.user = Mysql['MYSQL_USER']
+            self.password = Mysql['MYSQL_PASSWORD']
+            self.db = Mysql['MYSQL_DBNAME']
+            # self.conn = None
+            self.pool = self.create_pool()
+            self.condition_re = re.compile('(.*?)\\(')
+            self.params_re = re.compile('\\((.*?)\\)')
 
     def create_pool(self):
         conn = ConnectionPool(
