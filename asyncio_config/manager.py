@@ -218,12 +218,12 @@ class Manager(Basic, LoopGetter):
             time.sleep(1)
         flag = self.is_json(body.decode('utf-8'))
         if not flag:  # 判断是否为请求消息，如果不是的话
-            self.async_thread_pool.submit(self.parse_only, body=body.decode('utf-8'))  # 多线程数据处理
+            async_fun = self.async_thread_pool.submit(self.parse_only, body=body.decode('utf-8'))  # 多线程数据处理
 
             # fun_lists = self.parse_only(body=body.decode('utf-8'))
-            # if isinstance(fun_lists, Iterator):
-            #     for p in fun_lists:
-            #         self.send_message(message=p)
+            if isinstance(async_fun.result(), Iterator):
+                for p in async_fun.result():
+                    self.send_message(message=p, is_thread=True)
             self.num += 1
         if flag:  # 判断是否为请求消息，如果是的话
             self.make_params(body)
