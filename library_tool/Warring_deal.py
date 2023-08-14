@@ -75,7 +75,6 @@ class Warring_deal(object):
             return
         elif len(data) > 0:
             message_list_yuan = {'to_addr': "yuanshaohang@bailian.ai", 'messages': []}
-            message_list_liu = {'to_addr': "liuqingchuan@bailian.ai", 'messages': []}
             for i in data:
                 spider_name = i[0]
                 end_time = i[1]
@@ -90,15 +89,10 @@ class Warring_deal(object):
                 message = [spider_name, end_time, exec_info]
                 if owner == '袁少航' and not self.Find1(spider_name, message_list_yuan['messages']):
                     message_list_yuan['messages'].append(message)
-                elif owner != '袁少航' and not self.Find1(spider_name, message_list_liu['messages']):
-                    message_list_liu['messages'].append(message)
             print(self.list2table(message_list_yuan.get('messages')))
             print('========================================================')
-            print(self.list2table(message_list_liu.get('messages')))
             if message_list_yuan.get('messages'):
                 send_mail(title='爬虫异常报警', message=self.list2table(message_list_yuan['messages']), to_addr=message_list_yuan['to_addr'])
-            if message_list_liu.get('messages'):
-                send_mail(title='爬虫异常报警', message=self.list2table(message_list_liu['messages']), to_addr=message_list_liu['to_addr'])
 
 
 if __name__ == '__main__':

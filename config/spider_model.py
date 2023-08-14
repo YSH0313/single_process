@@ -65,8 +65,8 @@ def register_spider(spider_path: str, owner: str):
     :param owner: 所属人
     :return: 向调度平台注册
     """
-    url = "http://8.140.146.196:8889/liuqingchuan"
-    data = {'type': 'register', 'task_name': f'{spider_path}', 'group_name': 'kaifa', 'owner': owner, }
+    url = ''  # 你的接口路由
+    data = ''  # 你的表单
     response = requests.post(url=url, json=data)
     if response.status_code == 200:
         print(response.status_code, '增量爬虫注册成功')
