@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+# @Author: yuanshaohang
+# @Date: 2020-02-23 09:56:50
+# @Version: 1.0.0
+# @Description: 爬虫日志文件类
 import sys
 import logging
 from settings import log_path, log_level

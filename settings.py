@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+# @Author: yuanshaohang
+# @Date: 2020-02-23 09:56:50
+# @Version: 1.0.0
+# @Description: setting文件
 
 # 并发数
 PREFETCH_COUNT = 50

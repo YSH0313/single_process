@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # @Author: yuanshaohang
-# @Date: 2023-02-24- 18:17:44
+# @Date: 2020-02-24 18:17:44
 # @Version: 1.0.0
-# @Description: TODO
+# @Description: 数据库链接类
 
 
 import sys

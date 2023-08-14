@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+# @Author: yuanshaohang
+# @Date: 2020-02-23 09:56:50
+# @Version: 1.0.0
+# @Description: ip代理
 import os
 os.environ.setdefault('AIOHTTP_NO_EXTENSIONS', '1')
 import aiohttp
@@ -44,13 +49,7 @@ def abuyun():
 
 
 s = requests.session()
-# url = 'http://117.50.2.184:88/ippool'
-
-
-# url = 'http://10.9.21.91:88/ippool'
-
-# url = 'http://proxy-service.bailian-ai.com/random'
-url = 'http://8.140.146.196:9090/qdb/get_proxy'  # 站大爷代理
+url = ''  # 你的代理接口
 def rand_choi_pool_response():
     try:
         response = s.get(url=url)

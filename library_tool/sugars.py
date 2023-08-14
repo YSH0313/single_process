@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # @Author: yuanshaohang
-# @Date: 2023-02-23- 17:11:18
+# @Date: 2020-02-23 17:11:18
 # @Version: 1.0.0
 # @Description: 重试装饰器
 import time

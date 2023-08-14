@@ -1,10 +1,14 @@
+# -*- coding: utf-8 -*-
+# @Author: yuanshaohang
+# @Date: 2020-02-23 09:56:50
+# @Version: 1.0.0
+# @Description: SDK接口发送报警及邮件
 import requests
 import os
 
 
-# users = "liujiapeng"
 def send_weixin(message, users, agentid=None):
-    burl = "https://sendms.bailian-ai.com/v1/send/weixin?"
+    burl = "{你的路由}/weixin?"
     url = f"{burl}to_user={users}&message={message}"
     if agentid:
         url = url + f"&agentid={agentid}"
@@ -14,9 +18,9 @@ def send_weixin(message, users, agentid=None):
     return False
 
 
-def send_mail(title, message, to_addr, message_type="html", from_name='爬虫异常报警', from_user="data@zhiliaobiaoxun.com",
+def send_mail(title, message, to_addr, message_type="html", from_name='爬虫异常报警', from_user="{example@xx.com}",
               attach_list=None):
-    send_url = "https://api.business.001.bailian-ai.com/v1/email/send"
+    send_url = "{你的路由}/email/send"
     param = {
         "from_name": from_name,
         "from_user": from_user,
@@ -46,5 +50,5 @@ def send_mail(title, message, to_addr, message_type="html", from_name='爬虫异
 
 
 if __name__ == '__main__':
-    to_addr = "yuanshaohang@bailian.ai"
+    to_addr = "{发送者邮箱}"
     send_mail(title='收到邮件了吗', message='邮件已发送请查收', to_addr=to_addr)

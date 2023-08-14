@@ -1,4 +1,8 @@
-#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# @Author: yuanshaohang
+# @Date: 2020-02-23 09:56:50
+# @Version: 1.0.0
+# @Description: 发送邮件类
 import ssl
 import smtplib
 from settings import EMAIL_CONFIG
@@ -36,7 +40,8 @@ class SendMail(object):
         smtp.login(self.sender, self.password)  # 登录邮箱
         print('login!')
         try:
-            smtp.sendmail(self.sender, self.receivers, self.edit_content(contents).as_string())  # 参数分别是发送者，接收者，第三个是把上面的发送邮件的内容变成字符串
+            smtp.sendmail(self.sender, self.receivers,
+                          self.edit_content(contents).as_string())  # 参数分别是发送者，接收者，第三个是把上面的发送邮件的内容变成字符串
             print('success')
         except smtplib.SMTPException:
             print('error')
@@ -48,8 +53,10 @@ class SendMail(object):
         smtpObj.ehlo()
         smtpObj.starttls()
         smtpObj.login(self.email_user, self.email_pass)  # 登录账户
-        smtpObj.sendmail(self.sender, self.receivers.split(','), self.edit_content(contents).as_string())  # 发送邮件，多人发送时转化接收者为列表状态
+        smtpObj.sendmail(self.sender, self.receivers.split(','),
+                         self.edit_content(contents).as_string())  # 发送邮件，多人发送时转化接收者为列表状态
         print("\033[1;34;0m*******************邮件发送成功*********************\033[0m")
+
 
 if __name__ == '__main__':
     send = SendMail()

@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+# @Author: yuanshaohang
+# @Date: 2020-02-23 09:56:50
+# @Version: 1.0.0
+# @Description: 根据文件名称实例化类
 from collections import defaultdict
 import inspect
 import six
@@ -5,6 +10,7 @@ import warnings
 from importlib import import_module
 from importlib import reload
 from pkgutil import iter_modules
+
 
 def walk_modules(path):
     mods = []
@@ -22,29 +28,33 @@ def walk_modules(path):
                 mods.append(submod)
     return mods
 
+
 def iter_spider_classes(module):
     from asyncio_config.manager import Manager
     for obj in six.itervalues(vars(module)):
-        if inspect.isclass(obj) and issubclass(obj, Manager) and obj.__module__ == module.__name__ and  getattr(obj, 'name', None):
+        if inspect.isclass(obj) and issubclass(obj, Manager) and obj.__module__ == module.__name__ and getattr(obj,
+                                                                                                               'name',
+                                                                                                               None):
             yield obj
+
 
 class LoadSpiders():
     def __init__(self):
         self._spiders = {}
         self._found = defaultdict(list)
         self.spider_modules = ['spider']
-        self. _load_all_spiders()
+        self._load_all_spiders()
 
     def _check_name_duplicates(self):
         dupes = ["\n".join("  {cls} named {name!r} (in {module})".format(
-                                module=mod, cls=cls, name=name)
+            module=mod, cls=cls, name=name)
                            for (mod, cls) in locations)
                  for name, locations in self._found.items()
-                 if len(locations)>1]
+                 if len(locations) > 1]
         if dupes:
             msg = ("There are several spiders with the same name:\n\n"
                    "{}\n\n  This can cause unexpected behavior.".format(
-                        "\n\n".join(dupes)))
+                "\n\n".join(dupes)))
             warnings.warn(msg, UserWarning)
 
     def _load_spiders(self, module):
@@ -58,6 +68,5 @@ class LoadSpiders():
                 for module in walk_modules(name):
                     self._load_spiders(module)
             except ImportError as e:
-                    raise
+                raise
         self._check_name_duplicates()
-

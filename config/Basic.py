@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+# @Author: yuanshaohang
+# @Date: 2020-02-23 09:56:50
+# @Version: 1.0.0
+# @Description: 基本信息类
 import time
 import re
 import os

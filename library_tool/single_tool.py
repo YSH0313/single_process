@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # @Author: yuanshaohang
-# @Date: 2023-02-24- 18:28:40
+# @Date: 2020-02-23 09:56:50
 # @Version: 1.0.0
-# @Description: TODO
+# @Description: 公共方法类
 
 import io
 import re
@@ -495,7 +495,7 @@ class SingleTool(object):
         import os, sys
         sys.path.append(os.path.abspath(os.path.dirname(__file__)).split('js')[0])
         model_path = os.path.join(os.path.abspath(os.path.dirname(__file__)).split('config')[0],
-                                  'config/nijian_model.html')
+                                  'config/nj_model.html')
         with open(model_path, 'rb') as f:
             html = f.read().decode('utf-8')
             html = html.replace('<table></table>', table_html)
