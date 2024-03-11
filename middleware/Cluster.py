@@ -1,30 +1,33 @@
 # -*- coding: utf-8 -*-
 # @Author: yuanshaohang
-# @Date: 2020-02-24 18:17:44
+# @Date: 2023-02-24 18:17:44
 # @Version: 1.0.0
-# @Description: 数据库链接类
-
-
+# @Description: TODO
+import re
+import os
 import sys
-import oss2
 import json
+
+import pymongo
 import redis
-import hashlib
+import heapq
 import logging
+from dbutils.pooled_db import PooledDB
 import pymysql
 import datetime
+
+from pymongo.errors import ConnectionFailure, AutoReconnect
+
 from items import *
 from kafka import KafkaProducer
 from datetime import datetime, date
-from filestream_y.FileStream_y import stream_type
+from elasticsearch import Elasticsearch
 from rediscluster import RedisCluster
-from config.spider_log import SpiderLog
 from asyncio_config.my_Requests import MyRequests, MyFormRequests
-from settings import REDIS_HOST_LISTS, Mysql, redis_connection, kafka_servers, kafka_connection, access_key_id, \
-    access_key_secret, bucket_name, endpoint, IS_INSERT
+from settings import (REDIS_HOST_LISTS, Mysql, redis_connection, kafka_servers, kafka_connection, ES_CONFIG, IS_INSERT,
+                      IS_ES, MONGO_CONFIG)
 
-import re
-from middleware.pymysqlpool.pymysqlpool import ConnectionPool
+# from middleware.pymysqlpool.pymysqlpool import ConnectionPool
 from library_tool.single_tool import SingleTool
 
 
@@ -42,12 +45,11 @@ class ExpandJsonEncoder(json.JSONEncoder):
             return json.JSONEncoder.default(self, obj)
 
 
-class ParentObj(SpiderLog, SingleTool):
+class ParentObj(SingleTool):
     name = None
     spider_sign = None
 
     def __init__(self, custom_settings=None, **kwargs):
-        SpiderLog.__init__(self)
         SingleTool.__init__(self)
         if custom_settings:
             for varName, value in custom_settings.items():
@@ -133,42 +135,8 @@ class ParentObj(SpiderLog, SingleTool):
         item_last['html'] = html
         return item_last
 
-    def get_bucket(self):
-        return oss2.Bucket(oss2.Auth(access_key_id, access_key_secret), endpoint, bucket_name)
 
-    def oss_push_img(self, url, data, suffix='', custom=False, header={}):
-        """
-        :param url: 详情页链接
-        :param data: 文件二进制数据流
-        return: 对外能访问的图片URL
-        """
-        if len(data) < 10:
-            return url
-        oss_bucket = self.get_bucket()
-        stream = stream_type(data, header)
-        if not stream and not custom:
-            suffix_list = ['.doc', '.docx', '.xlr', '.xls', '.xlsx', '.pdf', '.txt', '.jpg', '.png', '.rar', '.zip']
-            for i in suffix_list:
-                if url.endswith(i):
-                    suffix = i
-            if not suffix.startswith('.'):
-                suffix = '.' + suffix
-        elif stream and not custom:
-            suffix = '.' + stream
-        else:
-            if not suffix.startswith('.'):
-                suffix = '.' + suffix
-        if 'html' in suffix or suffix == '.':
-            return url
-        url_md5 = hashlib.sha1(url.encode()).hexdigest() + suffix
-        if self.spider_sign:
-            url_md5 = 'proposed/' + hashlib.sha1(url.encode()).hexdigest() + suffix
-        oss_bucket.put_object(url_md5, data)
-        oss_url = f'https://bid.snapshot.qudaobao.com.cn/{url_md5}'
-        return oss_url
-
-
-class MysqlDb(ParentObj):
+class Mysqldb(ParentObj):
     def __init__(self, custom_settings=None, **kwargs):
         super().__init__(custom_settings=custom_settings, **kwargs)
         if custom_settings:
@@ -176,61 +144,56 @@ class MysqlDb(ParentObj):
                 s = globals().get(varName)
                 if s:
                     globals()[varName] = value
+        self.host = Mysql['MYSQL_HOST']
+        self.port = Mysql['PORT']
+        self.user = Mysql['MYSQL_USER']
+        self.password = Mysql['MYSQL_PASSWORD']
+        self.db = Mysql['MYSQL_DBNAME']
+        # self.conn = None
         if IS_INSERT:
-            self.host = Mysql['MYSQL_HOST']
-            self.port = Mysql['PORT']
-            self.user = Mysql['MYSQL_USER']
-            self.password = Mysql['MYSQL_PASSWORD']
-            self.db = Mysql['MYSQL_DBNAME']
-            # self.conn = None
             self.pool = self.create_pool()
             self.condition_re = re.compile('(.*?)\\(')
             self.params_re = re.compile('\\((.*?)\\)')
 
     def create_pool(self):
-        conn = ConnectionPool(
-            pool_name='mypool',
+        # 设置连接池参数
+        pool = PooledDB(
+            creator=pymysql,  # 使用PyMySQL作为数据库连接模块
+            maxconnections=10,  # 连接池最大连接数
+            mincached=2,  # 初始化时，池中至少创建的空闲的连接
+            maxcached=5,  # 池中最多闲置的连接
+            maxshared=3,  # 池中最多共享的连接数量
+            blocking=True,  # 连接池中如果没有可用连接后，是否阻塞等待
             host=self.host,
             port=self.port,
             user=self.user,
             password=self.password,
-            db=self.db,
-            autocommit=False
+            database=self.db,
+            charset='utf8mb4',
+            use_unicode=True
         )
-        return conn
+        return pool
 
     def execute(self, query, parameters=None, many=False):
-        attempts = 3  # allow 3 attempts to execute the query
-        while attempts > 0:
-            conn = self.pool.borrow_connection()
-            try:
-                with conn.cursor() as cursor:
-                    if many:
-                        cursor.executemany(query, parameters)
+        conn = self.pool.connection()
+        try:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+                if many:
+                    cursor.executemany(query, parameters)
+                else:
+                    if 'SELECT' in query:
+                        cursor.execute(query)
+                        results = cursor.fetchall()
+                        conn.commit()
+                        return results
                     else:
                         cursor.execute(query, parameters)
-                    conn.commit()
-                    if cursor.lastrowid:
-                        return cursor.lastrowid
-                    else:
-                        return cursor.rowcount
-            except pymysql.OperationalError as e:
-                if e.args[0] in (2006, 2013):  # MySQL server has gone away
-                    self.pool.close()
-                    self.pool = self.create_pool()
-                    attempts -= 1
-                else:
-                    raise
-            except Exception as e:
-                self.logger.error(f"Error while executing query: {e}")
-                conn.rollback()
-                attempts -= 1
-                if attempts == 0:
-                    raise Exception("Failed to execute query after 3 attempts")
-            finally:
-                self.pool.return_connection(conn)
-                # if conn:
-                #     conn.close()
+                conn.commit()
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+        finally:
+            conn.close()  # 使用完毕后，关闭连接（实际上会放回连接池，而不是真正的关闭）
 
     def insert(self, table, data, if_update=False, is_info=True):
         columns = ', '.join([f"`{i}`" for i in data.keys()])
@@ -295,20 +258,158 @@ class MysqlDb(ParentObj):
             query += f" OFFSET {offset}"
         self.logger.info('查询字段：' + query)
         self.logger.info('===========================================================')
-        with self.pool.cursor() as cursor:
-            cursor.execute(query)
-            data = cursor.fetchall()
-            if self.judge_er(condition):
-                condition_map = [i.upper() for i in condition_map.keys()]
-            if f'{condition}' in condition_map:
-                data = data[0].get(columns)
-            return data
+        results = self.execute(query)
+        return results
 
     def judge_er(self, str_data):
         if str_data.isupper():
             return True
         else:
             return False
+
+
+# 暂时弃用
+# class MysqlDb(ParentObj):
+#     def __init__(self, custom_settings=None, **kwargs):
+#         super().__init__(custom_settings=custom_settings, **kwargs)
+#         if custom_settings:
+#             for varName, value in custom_settings.items():
+#                 s = globals().get(varName)
+#                 if s:
+#                     globals()[varName] = value
+#         self.host = Mysql['MYSQL_HOST']
+#         self.port = Mysql['PORT']
+#         self.user = Mysql['MYSQL_USER']
+#         self.password = Mysql['MYSQL_PASSWORD']
+#         self.db = Mysql['MYSQL_DBNAME']
+#         # self.conn = None
+#         if IS_INSERT:
+#             self.pool = self.create_pool()
+#             self.condition_re = re.compile('(.*?)\\(')
+#             self.params_re = re.compile('\\((.*?)\\)')
+#
+#     def create_pool(self):
+#         conn = ConnectionPool(
+#             pool_name='mypool',
+#             host=self.host,
+#             port=self.port,
+#             user=self.user,
+#             password=self.password,
+#             db=self.db,
+#             autocommit=False
+#         )
+#         return conn
+#
+#     def execute(self, query, parameters=None, many=False):
+#         attempts = 3  # allow 3 attempts to execute the query
+#         while attempts > 0:
+#             conn = self.pool.borrow_connection()
+#             try:
+#                 with conn.cursor() as cursor:
+#                     if many:
+#                         cursor.executemany(query, parameters)
+#                     else:
+#                         cursor.execute(query, parameters)
+#                     conn.commit()
+#                     if cursor.lastrowid:
+#                         return cursor.lastrowid
+#                     else:
+#                         return cursor.rowcount
+#             except pymysql.OperationalError as e:
+#                 if e.args[0] in (2006, 2013):  # MySQL server has gone away
+#                     self.pool.close()
+#                     self.pool = self.create_pool()
+#                     attempts -= 1
+#                 else:
+#                     raise
+#             except Exception as e:
+#                 self.logger.error(f"Error while executing query: {e}")
+#                 conn.rollback()
+#                 attempts -= 1
+#                 if attempts == 0:
+#                     raise Exception("Failed to execute query after 3 attempts")
+#             finally:
+#                 self.pool.return_connection(conn)
+#                 # if conn:
+#                 #     conn.close()
+#
+#     def insert(self, table, data, if_update=False, is_info=True):
+#         columns = ', '.join([f"`{i}`" for i in data.keys()])
+#         placeholders = ', '.join(['%s'] * len(data))
+#         query = f"INSERT IGNORE INTO `{table}` ({columns}) VALUES ({placeholders});"
+#         sql = query % tuple([f"'{i}'" if i else i for i in data.values()])
+#         if if_update:
+#             update = ', '.join([f"`{key}` = %s" for key in data.keys()])
+#             query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders}) ON DUPLICATE KEY UPDATE {update}"
+#             sql = query % tuple([f"'{i}'" if i else i for i in data.values()] * 2)
+#         if is_info:
+#             self.logger.info(sql)
+#             self.logger.info('===========================================================')
+#         return self.execute(query, tuple(data.values()))
+#
+#     def update(self, table, set_data, where=None):
+#         set_pairs = [f"`{column}`=%s" for column in set_data.keys()]
+#         query = f"UPDATE `{table}` SET {', '.join(set_pairs)}"
+#         parameters = tuple(set_data.values())
+#         if where:
+#             query += f" WHERE {where}"
+#         sql = query % tuple([f"'{i}'" if i else i for i in parameters])
+#         self.logger.info(sql)
+#         self.logger.info('===========================================================')
+#         return self.execute(query, parameters)
+#
+#     def delete(self, table, where=None):
+#         query = f"DELETE FROM `{table}`"
+#         if where:
+#             query += f" WHERE {where}"
+#         self.logger.info(query)
+#         self.logger.info('===========================================================')
+#         return self.execute(query)
+#
+#     def trucate(self, table):
+#         sql = f"""TRUNCATE `{table}`;"""
+#         return self.execute(sql)
+#
+#     def get_condition(self, columns):
+#         condition_map = {'count': 'count', 'max': 'max', 'min': 'min', 'sum': 'sum', 'avg': 'avg',
+#                          'distinct': 'distinct'}
+#         condition = ''
+#         if isinstance(columns, list):
+#             columns = ', '.join([f"`{i}`" for i in columns])
+#         elif isinstance(columns, str):
+#             condition = self.deal_re(self.condition_re.search(columns))
+#             condition_exis = True if [True for i in condition_map.keys() if i.upper() in columns.upper()] else False
+#             if not condition_exis:
+#                 columns = ', '.join(f'`{i.strip(" ")}`' for i in columns.split(','))
+#         return condition_map, condition, columns
+#
+#     def select(self, table, columns='*', where=None, order_by=None, limit=None, offset=None):
+#         condition_map, condition, columns = self.get_condition(columns)
+#         query = f"SELECT {columns} FROM `{table}`"
+#         if where:
+#             query += f" WHERE {where}"
+#         if order_by:
+#             query += f" ORDER BY {order_by}"
+#         if limit:
+#             query += f" LIMIT {limit}"
+#         if offset:
+#             query += f" OFFSET {offset}"
+#         self.logger.info('查询字段：' + query)
+#         self.logger.info('===========================================================')
+#         with self.pool.cursor() as cursor:
+#             cursor.execute(query)
+#             data = cursor.fetchall()
+#             if self.judge_er(condition):
+#                 condition_map = [i.upper() for i in condition_map.keys()]
+#             if f'{condition}' in condition_map:
+#                 data = data[0].get(columns)
+#             return data
+#
+#     def judge_er(self, str_data):
+#         if str_data.isupper():
+#             return True
+#         else:
+#             return False
 
 
 class KafkaDb(ParentObj):
@@ -323,9 +424,11 @@ class KafkaDb(ParentObj):
         if kafka_connection:
             self.producer = KafkaProducer(bootstrap_servers=kafka_servers['server'], max_request_size=3145728,
                                           api_version=(0, 10, 2))
+        self.pwd = os.getcwd()
+        self.spider_path = os.path.join(self.pwd, f'{self.name}.py')
 
     def key_judge(self, item):
-        key_list = ['title', 'url', 'pub_time', 'source', 'html']
+        key_list = ['title', 'url', 'source', 'html']
         if isinstance(item, BiddingItem):
             item = item.dict()
         for k in key_list:
@@ -335,7 +438,7 @@ class KafkaDb(ParentObj):
         return True
 
     def value_judge(self, item):
-        key_list = ['title', 'url', 'pub_time', 'source', 'html']
+        key_list = ['title', 'url', 'source', 'html']
         if isinstance(item, BiddingItem):
             item = item.dict()
         for k in key_list:
@@ -355,7 +458,7 @@ class KafkaDb(ParentObj):
             key_judge = self.key_judge(item)
             value_judge = self.value_judge(item)
         item['pub_time'] = self.date_refix(item.get('pub_time')) if item.get('pub_time') else None
-        if (key_judge == True and value_judge == True and item['pub_time']) or (
+        if (key_judge == True and value_judge == True) or (
                 item.get('project_name') and self.spider_sign):
             if self.pages:
                 item['monitor'] = True
@@ -371,11 +474,11 @@ class KafkaDb(ParentObj):
             debug_info = value_judge
             if (not key_judge and not value_judge) or self.spider_sign:
                 debug_info = 'project_name'
-            if debug_info and not item['pub_time']:
-                debug_info = 'pub_time'
+            self.miss_filed = debug_info
             self.logger.debug(
                 f'\033[5;31;1m{debug_info} \033[5;33;1mfield does not exist, Data validation failed, please check！\033[0m {item}')
-            self.send_log(req_id=0, code='31', log_level='WARN', url=item['url'], message=f'抓取结果缺少{debug_info}字段',
+            self.send_log(req_id=0, code='31', log_level='WARN', url=item['url'],
+                          message=f'抓取结果缺少{debug_info}字段',
                           show_url=item.get('show_url'))
             self.error_count += 1
         self.catch_count += 1
@@ -405,6 +508,7 @@ class RedisDb(ParentObj):
     def __init__(self, key='', custom_settings=None, **kwargs):
         super().__init__(custom_settings=custom_settings, **kwargs)
         self.key = 'ysh_' + key
+        self.callback_map = {}  # 回调函数优先级map表
         if custom_settings:
             for varName, value in custom_settings.items():
                 s = globals().get(varName)
@@ -413,15 +517,21 @@ class RedisDb(ParentObj):
         if redis_connection:
             if len(REDIS_HOST_LISTS) == 1:
                 for k, v in REDIS_HOST_LISTS[0].items():
-                    self.pool = redis.ConnectionPool(host=k, port=v, db=1, decode_responses=True)
-                    self.r = redis.Redis(connection_pool=self.pool)
+                    # self.pool = redis.ConnectionPool(host=k, port=v, db=8, decode_responses=True)
+                    # self.r = redis.Redis(connection_pool=self.pool)
+
+                    self.r = redis.Redis(host=k, port=v, password='dADM1QUHjD@',
+                                         db=8, socket_timeout=None,
+                                         connection_pool=None, charset='utf8', errors='strict',
+                                         decode_responses=True,
+                                         unix_socket_path=None)
             elif len(REDIS_HOST_LISTS) > 1:
                 self.r = RedisCluster(startup_nodes=self.startup_nodes, decode_responses=True)
 
     def get_len(self, key):
         keys = self.get_keys(key)
         # 每个键的任务数量
-        key_len = [(k, self.r.llen(k)) for k in keys]
+        key_len = [(k, self.r.scard(k)) for k in keys]
         # 所有键的任务数量
         task_len = sum(dict(key_len).values())
         return task_len, key_len
@@ -446,6 +556,7 @@ class RedisDb(ParentObj):
         # 序列化任务参数
         if (isinstance(tasks, MyFormRequests)) or (isinstance(tasks, MyRequests)):
             mess_demo = {}
+            fun_name = ''
             for k, v in tasks.__dict__.items():
                 if (k == 'callback') and (v != None):
                     if (isinstance(v, str)):
@@ -455,16 +566,132 @@ class RedisDb(ParentObj):
                         mess_demo['callback'] = fun_name
                 else:
                     mess_demo[k] = v
+            if fun_name not in self.callback_map.keys():
+                self.callback_map[fun_name] = mess_demo.get('level') or 0
             tasks = json.dumps(mess_demo, cls=ExpandJsonEncoder)
-            self.r.lpush(new_key, tasks)
+            # self.r.lpush(new_key, tasks)
+            self.r.sadd(new_key, tasks)
         elif isinstance(tasks, dict):
             tasks = json.dumps(tasks, cls=ExpandJsonEncoder)
-            self.r.lpush(new_key, tasks)
+            # self.r.lpush(new_key, tasks)
+            self.r.sadd(new_key, tasks)
         else:
-            self.r.lpush(new_key, tasks)
+            # self.r.lpush(new_key, tasks)
+            self.r.sadd(new_key, tasks)
 
 
-class Cluster(MysqlDb, KafkaDb, RedisDb):
+class PriorityQueue(ParentObj):
+    def __init__(self, custom_settings=None, **kwargs):
+        super().__init__(custom_settings=custom_settings, **kwargs)
+        self._queue = []
+        self._index = 0
+        self.callback_map = {}  # 回调函数优先级map表
+        if custom_settings:
+            for varName, value in custom_settings.items():
+                s = globals().get(varName)
+                if s:
+                    globals()[varName] = value
+
+    def push(self, item, priority=0):
+        # 序列化任务参数
+        if (isinstance(item, MyFormRequests)) or (isinstance(item, MyRequests)):
+            mess_demo = {}
+            fun_name = ''
+            for k, v in item.__dict__.items():
+                if (k == 'callback') and (v != None):
+                    if (isinstance(v, str)):
+                        mess_demo[k] = v
+                    else:
+                        fun_name = v.__name__
+                        mess_demo['callback'] = fun_name
+                else:
+                    mess_demo[k] = v
+            if fun_name not in self.callback_map.keys():
+                self.callback_map[fun_name] = mess_demo.get('level') or 0
+            priority = mess_demo.get('level')
+            item = json.dumps(mess_demo, cls=ExpandJsonEncoder)
+        heapq.heappush(self._queue, (-priority, self._index, item))  # 添加优先级和索引及元素
+        self._index += 1
+
+    def pop(self):
+        if self._queue:
+            data = heapq.heappop(self._queue)[-1]  # 返回元素不返回优先级和索引
+            return data
+
+
+class EsDb(ParentObj):
+    def __init__(self, custom_settings=None, **kwargs):
+        super().__init__(custom_settings=custom_settings, **kwargs)
+        if custom_settings:
+            for varName, value in custom_settings.items():
+                s = globals().get(varName)
+                if s:
+                    globals()[varName] = value
+        if IS_ES:
+            self.es = Elasticsearch(hosts=ES_CONFIG['host'], port=ES_CONFIG['port'],
+                                    http_auth=(ES_CONFIG['user'], ES_CONFIG['password']), request_timeout=60)
+
+
+class MongoDBManager(ParentObj):
+    def __init__(self, custom_settings=None, **kwargs):
+        super().__init__(custom_settings=custom_settings, **kwargs)
+        if custom_settings:
+            for varName, value in custom_settings.items():
+                s = globals().get(varName)
+                if s:
+                    globals()[varName] = value
+        MONGODB_HOST = MONGO_CONFIG['MONGODB_HOST']
+        MONGODB_PORT = MONGO_CONFIG['MONGODB_PORT']
+        MONGODB_BASE = MONGO_CONFIG['MONGODB_BASE']
+        try:
+            self.mongo_client = pymongo.MongoClient(f"mongodb://{MONGODB_HOST}:{MONGODB_PORT}/")
+            self.mong_db = self.mongo_client[MONGODB_BASE]
+        except (ConnectionFailure, AutoReconnect) as e:
+            raise Exception(f"Failed to connect to MongoDB: {e}")
+
+    def insert_data(self, collection_name, data):
+        try:
+            collection = self.mong_db[collection_name]
+            result = collection.insert_one(data)
+            return result.inserted_id
+        except pymongo.errors.DuplicateKeyError as e:
+            raise Exception(f"Failed to insert data: {e}")
+
+    def find_data(self, collection_name, query):
+        try:
+            collection = self.mong_db[collection_name]
+            result = collection.find(query)
+            return result
+        except Exception as e:
+            raise Exception(f"Failed to find data: {e}")
+
+    def find_paginated_data(self, collection_name, page_number, page_size):
+        try:
+            collection = self.mong_db[collection_name]
+            skip_documents = (page_number - 1) * page_size
+            result = collection.find().skip(skip_documents).limit(page_size)
+            return result
+        except Exception as e:
+            raise Exception(f"Failed to find data: {e}")
+
+    def update_data(self, collection_name, query, update_data):
+        try:
+            collection = self.mong_db[collection_name]
+            result = collection.update_many(query, {"$set": update_data})
+            return result.modified_count
+        except Exception as e:
+            raise Exception(f"Failed to update data: {e}")
+
+    def delete_data(self, collection_name, query):
+        try:
+            collection = self.mong_db[collection_name]
+            result = collection.delete_many(query)
+            return result.deleted_count
+        except Exception as e:
+            raise Exception(f"Failed to delete data: {e}")
+
+
+class Cluster(Mysqldb, KafkaDb, RedisDb, PriorityQueue, EsDb, MongoDBManager):
     def __init__(self, key='', custom_settings=None, **kwargs):
         super().__init__(key=key, custom_settings=custom_settings, **kwargs)
 
@@ -472,12 +699,14 @@ class Cluster(MysqlDb, KafkaDb, RedisDb):
 if __name__ == '__main__':
     database = Cluster()
 
-    for i in range(10):
-        database.insert(table='db_base_test', data={'name': 'yuanshaohang', 'age': None, 'sex': '男'})  # 增
-
-    database.update(table='db_base_test', set_data={'name': '袁少航', 'age': 20, 'sex': '男'}, where="`name`='yuanshaohang'")  # 改
-
-    database.delete(table='db_base_test', where="name='袁少航' limit 1")  # 删
-
-    data_list = database.select(table='db_base_test', columns='name', where='`name` = "袁少航"')  # 查
-    print(data_list)
+    # for i in range(10):
+    #     database.insert(table='db_base_test', data={'name': 'yuanshaohang', 'age': None, 'sex': '男'})  # 增
+    #
+    # database.update(table='db_base_test', set_data={'name': '袁少航', 'age': 20, 'sex': '男'}, where="`name`='yuanshaohang'")  # 改
+    #
+    database.delete(table='weihu_website', where="`description` = '超过三个小时未结束'")  # 删
+    #
+    # data_list = database.select(table='db_base_test', columns='name', where='`name` = "袁少航"')  # 查
+    # print(data_list)
+    # query = {'_source': ['domain'], 'size': 1, 'query': {'match_phrase': {'source': '大邑县人民政府'}}}
+    # print(database.es.search(index='bidding-source', body=query), 'hits.hits[0]._source.domain')

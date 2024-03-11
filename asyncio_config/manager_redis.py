@@ -1,118 +1,189 @@
 # -*- coding: utf-8 -*-
-# @Author: yuanshaohang
-# @Date: 2020-02-23 09:56:50
-# @Version: 1.0.0
-# @Description: Manager核心文件
 import re
 import os
+import ssl
+import sys
+from itertools import chain
+
+from requests.exceptions import ProxyError
+
+ssl._create_default_https_context = ssl._create_unverified_context
 import json
+import time
 import aiohttp
 import asyncio
-import logging
+import chardet  # 字符集检测
 import pdfminer
+import threading
+import logging
+import async_timeout
 import concurrent.futures
-from itertools import chain
+from yarl import URL
+from scrapy.selector import Selector
 from collections import Iterator
 from config.Basic import Basic
-# from config.proxys import self.asy_rand_choi_pool
 from asyncio_config.my_Requests import MyResponse
-from settings import PREFETCH_COUNT, TIME_OUT, X_MAX_PRIORITY, Mysql, IS_PROXY, IS_SAMEIP, Asynch, Waiting_time, Delay_time, max_request, Agent_whitelist, retry_http_codes
+from concurrent.futures import wait, ALL_COMPLETED
+from settings import PREFETCH_COUNT, TIME_OUT, IS_PROXY, IS_SAMEIP, Asynch, Waiting_time, Delay_time, \
+    max_request, Agent_whitelist, retry_http_codes, UA_PROXY
 
-# socket.timeout = TIME_OUT
-logging.getLogger("root").setLevel(logging.WARNING)
+shutdown_lock = threading.Lock()
 
 
-class ManagerRedis(Basic):
-    name = None
-    custom_settings = {}
-
-    def __init__(self):
-        if self.custom_settings:
-            Basic.__init__(self, queue_name=self.name, custom_settings=self.custom_settings)
-            for varName, value in self.custom_settings.items():
-                s = globals().get(varName)
-                if s:
+class LoopGetter(object):
+    def __init__(self, custom_settings=None):
+        if custom_settings:
+            for varName, value in custom_settings.items():
+                if varName in globals().keys():
                     globals()[varName] = value
-        else:
-            Deal.__init__(self, queue_name=self.name)
-        self.logger = logging.getLogger(__name__)
-        self.num = PREFETCH_COUNT
-        self.timeout = TIME_OUT
-        self.x_max_priority = X_MAX_PRIORITY
-        self.mysql = Mysql
-        self.is_proxy = IS_PROXY
-        self.is_sameip = IS_SAMEIP
-        self.asynch = Asynch
-        self.waiting_time = Waiting_time
-        self.delay_time = Delay_time
-        self.max_request = max_request
-        self.new_loop = asyncio.new_event_loop()
+
         # 定义一个线程，运行一个事件循环对象，用于实时接收新任务
+        self.new_loop = asyncio.new_event_loop()
         self.loop_thread = threading.Thread(target=self.start_loop, args=(self.new_loop,))
         self.loop_thread.setDaemon(True)
         self.loop_thread.start()
 
-        self.other_loop = asyncio.new_event_loop()
         # 定义一个线程，运行一个事件循环对象，用于实时接收新任务
-        self.loop_other = threading.Thread(target=self.start_loop, args=(self.other_loop,))
-        self.loop_other.setDaemon(True)
-        self.loop_other.start()
+        self.shutdown_loop = asyncio.new_event_loop()
+        self.loop_shutdown = threading.Thread(target=self.start_loop, args=(self.shutdown_loop,))
+        self.loop_shutdown.setDaemon(True)
+        self.loop_shutdown.start()
+
         self.charset_code = re.compile(r'charset=(.*?)"|charset=(.*?)>|charset="(.*?)"', re.S)
         self.last_time = time.time()
         self.starttime = None
+        self.start_run_time = time.time()
 
     def start_loop(self, loop):
         # 一个在后台永远运行的事件循环
         asyncio.set_event_loop(loop)
         loop.run_forever()
 
-    def open_spider(self, spider_name):  # 开启spider第一步检查状态
-        data = self.select_data(field_lists=['spider_name', 'interval_time', 'incremental', 'is_run', 'end_time', 'server_name', 'owner'], db_name=self.mysql['MYSQL_DBNAME'], table='single_process_listener', where="""spider_name = '{spider_name}'""".format(spider_name=spider_name))
-        if data:
-            self.update_data({'is_run': 'yes'}, self.mysql['MYSQL_DBNAME'], 'single_process_listener', where="""`spider_name` = '{spider_name}'""".format(spider_name=spider_name))
-            self.logger.info('Crawler program starts')
+    def start_requests(self):
+        pass
+
+    def parse(self, response):
+        pass
+
+    def parse_only(self, body):
+        pass
+
+    def close_spider(self, **kwargs):
+        pass
+
+
+class ManagerRedis(Basic, LoopGetter):
+    name = None
+    spider_sign = None
+    custom_settings = {}
+
+    def __init__(self):
+        if self.custom_settings:
+            Basic.__init__(self, queue_name=self.name, custom_settings=self.custom_settings, class_name='Manager')
+            LoopGetter.__init__(self, custom_settings=self.custom_settings)
+            for varName, value in self.custom_settings.items():
+                if varName in globals().keys():
+                    globals()[varName] = value
+        else:
+            LoopGetter.__init__(self)
+            Basic.__init__(self, queue_name=self.name, class_name='Manager')
+        self.pages = int(sys.argv[1]) if len(sys.argv) > 1 else None
+        self.logger.name = logging.getLogger(__name__).name
+        self.num = PREFETCH_COUNT
+        self.is_proxy = IS_PROXY
+        self.is_sameip = IS_SAMEIP
+
+    def Environmental_judgment(self):
+        if self.operating_system == 'linux' and self.pages and len(sys.argv) > 1:
             return True
         else:
-            self.logger.info('\033[5;36;1mIf you need to turn on increment, please register and try to run again. If not, please ignore it\033[0m')
-            self.logger.info('\033[5;36;1mCrawler service startup for {spider_name}\033[0m'.format(spider_name=spider_name))
-            # self.logger.info(self.colored_font('If you need to turn on increment, please register and try to run again. If not, please ignore it'))
-            # self.logger.info(self.colored_font('Crawler service startup for {spider_name}'.format(spider_name=spider_name)))
-            return True
+            return False
 
-    def run(self):  # 启动spider的入口
-        # package = __import__(self.path+ self.key.replace('ysh_', ''), fromlist=['None'])
-        # temp_class = getattr(package, self.key.replace('ysh_', ''))
+    def start_loop(self, loop):
+        # 一个在后台永远运行的事件循环
+        asyncio.set_event_loop(loop)
+        loop.run_forever()
+
+    def open_spider(self, spider_name: str):
+        """开启spider第一步检查状态"""
+        data = self.select(table='spiderlist_monitor', columns=['owner', 'remarks'],
+                           where=f"""spider_name = '{spider_name}'""")
+        if data:
+            self.owner = self.per_json(data, '[0].owner')
+            self.source = self.per_json(data, '[0].remarks')
+        if data and self.operating_system == 'linux' and self.pages and len(sys.argv) > 1:
+            self.update(table='spiderlist_monitor', set_data={'is_run': 'yes', 'start_time': self.now_time()},
+                        where=f"""`spider_name` = '{spider_name}'""")
+            if not self.monitor:
+                self.send_start_info()
+        elif not data:
+            self.logger.info(
+                'If you need to turn on increment, please register and try to run again. If not, please ignore it')
+            self.logger.info(f'Crawler service startup for {spider_name}')
+        self.logger.info('Crawler program starts')
+        return True
+
+    def make_start_request(self, start_fun: {__name__}):
+        try:
+            start_task = self.__getattribute__(start_fun.__name__)()
+            if isinstance(start_task, Iterator):
+                for s in start_task:
+                    # self.send_message(message=s)
+                    self.push_task(key=self.key, tasks=s, level=s.__dict__['level'])
+        except:
+            import traceback
+            traceback.print_exc()
+
+    def run(self):
+        """启动spider的入口"""
+        # package = __import__(self.path+ self.queue_name.replace('ysh_', ''), fromlist=['None'])
+        # temp_class = getattr(package, self.queue_name.replace('ysh_', ''))
         # self.duixiang = temp_class()
         # self.duixiang = actuator.LoadSpiders()._spiders[spider_name]()
         self.starttime = self.now_time()
         self.start_time = time.time()
         status = self.open_spider(spider_name=self.name)
-        if status == True:
-            count = self.get_len(self.key)[0]
-            if count == 0:
-                if 'Breakpoint' in self.custom_settings.keys():
-                    if Asynch:
-                        main_thead([self.start_requests], key=self.key, signal=self.custom_settings['Breakpoint'])
-                    else:
-                        start_th([self.start_requests], queue_name=self.key, signal=self.custom_settings['Breakpoint'])
-                else:
-                    if Asynch:
-                        main_thead(fun_lists=[self.start_requests], key=[self.key])
-                    else:
-                        start_th([self.start_requests], queue_name=[self.key])
-            asyncio.run_coroutine_threadsafe(self.shutdown_spider(spider_name=self.name), self.other_loop)
-            self.consumer_status = main_thead(fun_lists=[self.consumer], key=[self.key])
-            self.logger.info('Consumer thread open ' + str(self.consumer_status))
-        else:
-            return
+        if status:
+            """
+                暂时停用，或属于逻辑重复代码，待观察
+                if 'Breakpoint' in self.custom_settings.keys():  # 如果修改了开启断点参数
+                if Asynch:  # 如果是异步生产（一边生产一边消费）
+                    self.async_thread_pool.submit(self.make_start_request, start_fun=self.start_requests)
 
-    async def shutdown_spider(self, spider_name):  # 监控队列及运行状态
+                else:  # 如果不需要异步生产（等生产完之后再开始消费）
+                    self.async_thread_pool.submit(self.make_start_request, start_fun=self.start_requests)
+                    wait(fs=self.work_list, timeout=None, return_when=ALL_COMPLETED)
+
+            else:  # 如果是默认断点配置"""
+
+            if Asynch:  # 如果是异步生产（一边生产一边消费）
+                self.async_thread_pool.submit(self.make_start_request, start_fun=self.start_requests)
+
+            else:  # 如果不需要异步生产（等生产完之后再开始消费）
+                self.work_list.append(
+                    self.async_thread_pool.submit(self.make_start_request, start_fun=self.start_requests))
+                wait(fs=self.work_list, timeout=None, return_when=ALL_COMPLETED)
+
+            # 开启监控队列状态
+            asyncio.run_coroutine_threadsafe(self.shutdown_spider(spider_name=self.name), self.shutdown_loop)
+            self.consumer_status = self.async_thread_pool.submit(self.consumer_redis)  # 开启消费者
+            self.logger.info(f'Consumer thread open {str(self.consumer_status)}')
+            self.work_list.append(self.consumer_status)
+            wait(fs=self.work_list, timeout=None, return_when=ALL_COMPLETED)
+
+        elif status == False:
+            self.logger.info('爬虫任务启动失败，可能是由于检查爬虫状态导致！')
+
+    async def shutdown_spider(self, spider_name: str):
+        """监控队列及运行状态"""
         while 1:
             now_time = time.time()
-            self.logger.debug("It's been " + str(now_time - self.last_time) + ' seconds since the last time I took data from the queue. The remaining number of queues is ' + str(self.get_len(self.key)[0]))
-            if (now_time - self.last_time >= self.waiting_time) and (self.get_len(self.key)[0] == 0):
+            self.logger.debug(
+                f"It's been {round(now_time - self.last_time, 2)} seconds since the last time I took data from the queue. The remaining number of queues is {self.get_len(self.key)[0]}")
+            if (now_time - self.last_time >= Waiting_time) and (self.get_len(self.key)[0] == 0):
                 try:
-                    self.update_data({'is_run': 'no', 'end_time': str(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))}, db_name=self.mysql['MYSQL_DBNAME'], table='single_process_listener', where="""`spider_name` = '{spider_name_demo}'""".format(spider_name_demo=spider_name))
+                    self.update(table='spiderlist_monitor', set_data={'is_run': 'no', 'end_time': self.now_time()},
+                                where=f"""`spider_name` = '{spider_name}'""")
                 except Exception as e:
                     self.logger.error("Crawler closed, abnormal update of running status", exc_info=True)
                 self.finished_info(self.starttime, self.start_time)  # 完成时的日志打印
@@ -120,9 +191,9 @@ class ManagerRedis(Basic):
                 # stop_thread(self.consumer_status)
                 # self.r.connection_pool.disconnect()
                 break
-            time.sleep(self.delay_time)
+            time.sleep(Delay_time)
 
-    def consumer(self, keys=None, priority=True):
+    def consumer_redis(self, keys=None, priority=True):
         '''
         双端队列 右边弹出任务
         :param keys: 键列表，默认为None（将获取所有任务的keys）
@@ -138,23 +209,22 @@ class ManagerRedis(Basic):
                 all_keys = sorted(all_keys, key=lambda x: int(x.split('-')[-1]), reverse=True)  # 屏蔽任务差异性，只按优先级高到低弹出任务
             if all_keys:
                 # task_key, task = self.r.brpop(all_keys)  # 右边弹出任务,优先消费优先级低的
-                task_key, task = self.r.blpop(all_keys)  # 左边弹出任务，有限消费优先级高的
-                self.Requests(json.loads(task))
+                # task = self.r.blpop(all_keys[0])  # 左边弹出任务，优先消费优先级高的
+                task = self.r.spop(all_keys[0])  # 左边弹出任务，优先消费优先级高的
 
-    def Requests(self, message):
+                self.Requests_redis(json.loads(task))
+
+    def Requests_redis(self, message):
         self.last_time = time.time()
         self.num -= 1
         while self.num < 0:
             self.logger.debug('The request queue is full')
             time.sleep(1)
         flag = self.is_json(message)
-        if flag == False:
-            fun_lists = self.parse_only(body=message)
-            if isinstance(fun_lists, Iterator):
-                for p in fun_lists:
-                    self.push_task(key=self.key, tasks=p, level=p.__dict__['level'])
+        if not flag:
+            self.async_thread_pool.submit(self.parse_only, body=message)  # 多线程数据处理
             self.num += 1
-        if (flag == True):
+        if flag:
             contents = message
             callback_demo = contents.get('callback')
             url = contents.get('url')
@@ -176,7 +246,7 @@ class ManagerRedis(Basic):
             meta = param[0]
             proxy = param[1]
             method = 'POST' if contents.get('method') == 'POST' else 'GET'
-            timeout = timeout if timeout else self.timeout
+            timeout = timeout if timeout else TIME_OUT
             asyncio.run_coroutine_threadsafe(self.start_Requests(method=method, url=url, body=contents, headers=headers,
                                                                  params=params, data=data, json_params=json_params,
                                                                  timeout=timeout, callback=callback_demo, meta=meta,
@@ -195,7 +265,7 @@ class ManagerRedis(Basic):
             proxy = await self.asy_rand_choi_pool()
             if self.is_sameip:
                 meta['proxy'] = proxy
-        while (retry_count < self.max_request):
+        while (retry_count < max_request):
             try:
                 async with aiohttp.ClientSession(headers=headers, conn_timeout=timeout, cookies=cookies) as session:
                     if (method == 'GET'):
@@ -230,7 +300,7 @@ class ManagerRedis(Basic):
                 await self.Iterative_processing(method=method, callback=callback, response_last=response_last, body=body, level=level, retry_count=retry_count)
 
             except Exception as e:
-                if (not self.is_proxy) and (self.max_request):
+                if (not self.is_proxy) and (max_request):
                     retry_count += 1
                     await self.retry(method, url, retry_count, repr(e), body)
                 else:
@@ -277,38 +347,52 @@ class ManagerRedis(Basic):
                 self.logger.error('{err} Decoding error {body}'.format(err=repr(e), body=body), exc_info=True)
 
     async def Iterative_processing(self, method, callback, response_last, body, level, retry_count):  # 迭代器及异常状态码处理函数
-        if (response_last.status_code != 200) and (response_last.status_code in retry_http_codes) and (retry_count < self.max_request):
+        if (response_last.status_code != 200) and (response_last.status_code in retry_http_codes) and (retry_count < max_request):
             body['retry_count'] = retry_count = int(retry_count) + 1
             if self.is_proxy:
                 body['proxy'] = await self.asy_rand_choi_pool()
                 if self.is_sameip:
                     body['meta']['proxy'] = body['proxy']
 
-            if (retry_count < self.max_request):
+            if (retry_count < max_request):
                 self.push_task(key=self.key, tasks=body, level=level)
                 await self.retry(method, response_last.url, str(retry_count), 'Wrong status code {status}'.format(status=response_last.status_code), str(body))
                 self.exc_count += 1
-            elif (retry_count == self.max_request):
+            elif (retry_count == max_request):
                 self.logger.debug('Give up <{message}>'.format(message=body.decode('utf-8')))
                 self.fangqi_count += 1
                 response_last.retry_count = retry_count
-                await self.deal_fun(callback=callback, response_last=response_last, level=level)
+                await self.__deal_fun(callback=callback, response_last=response_last)
             return
-        await self.deal_fun(callback=callback, response_last=response_last, level=level)
+        await self.__deal_fun(callback=callback, response_last=response_last)
 
-    async def deal_fun(self, callback, response_last, level):
-        if self.__getattribute__(callback)(response=response_last):
-            for c in self.__getattribute__(callback)(response=response_last):
-                if c.meta == {}:
+    async def __deal_fun(self, callback, response_last):
+        """回调函数处理"""
+        try:
+            if response_last.text:
+                response_last.xpath = Selector(response=response_last).xpath
+            if self.__getattribute__(callback)(response=response_last):
+                for c in self.__getattribute__(callback)(response=response_last):
                     c.meta['proxy'] = response_last.meta.get('proxy')
-                else:
-                    c.meta = dict(response_last.meta, **c.meta)
-
-                if int(response_last.level) + 1 > self.x_max_priority:
-                    c.level = self.x_max_priority
-                else:
-                    c.level = int(response_last.level) + 1  # 优先级自动递增，适用yield
-                self.push_task(key=self.key, tasks=c, level=level)
+                    callname = c.callback if isinstance(c.callback, str) else c.callback.__name__
+                    if not c.level:
+                        c.level = self.callback_map[callback]+1 if callback != callname else self.callback_map[callback]
+                    # print(f'{callback}优先级：{c.level}')
+                    self.push_task(key=self.key, tasks=c, level=c.level)
+        except Exception as e:
+            self.exec_count += 1
+            # self.send_log(req_id=response_last.log_info['req_id'], code='32', log_level='ERROR', url=response_last.url,
+            #               message='爬虫逻辑报错',
+            #               formdata=self.dic2params(response_last.log_info['params'], response_last.log_info['data'],
+            #                                        response_last.log_info['json_params']),
+            #               show_url=response_last.meta.get('show_url'))
+            # if self.exec_count >= 100 and self.pages:
+            #     import os
+            #     self.finished_info(self.starttime, self.start_time, exec_info=True)  # 完成时的日志打印
+            #     if self.pages:
+            #         self.send_close_info()
+            #     os._exit(0)
+            self.logger.error(e, exc_info=True)
 
     async def infos(self, status, method, url):  # 日志函数
         self.request_count += 1

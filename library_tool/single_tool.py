@@ -5,12 +5,16 @@
 # @Description: 公共方法类
 
 import io
+import logging
+import os
 import re
 import csv
 import xlrd
 import json
 import time
 import html
+import oss2
+
 import base64
 import execjs
 import hashlib
@@ -24,7 +28,6 @@ from math import ceil
 import dateutil.parser
 import dateutil.parser
 import pdfminer.psparser
-from urllib import parse
 import demjson3 as demjson
 from string import Template
 from datetime import datetime
@@ -36,11 +39,27 @@ from xml.sax.saxutils import unescape, escape
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 from binascii import *
+import yt_dlp
+from qcloud_cos import CosS3Client
+from qcloud_cos import CosConfig, CosClientError, CosServiceError
 from filestream_y.FileStream_y import stream_type
 from library_tool.ocrutils import RecoFactory
+from config.spider_log import SpiderLog
+from settings import access_key_id, access_key_secret, bucket_name, endpoint, region, secret_id, secret_key, cos_bucket
 
 
-class SingleTool(object):
+class SingleTool(SpiderLog):
+    name = None
+    spider_sign = None
+
+    def __init__(self, custom_settings=None, **kwargs):
+        SpiderLog.__init__(self)
+        if custom_settings:
+            for varName, value in custom_settings.items():
+                s = globals().get(varName)
+                if s:
+                    globals()[varName] = value
+        self.logger.name = logging.getLogger(__name__).name
 
     def deal_re(self, demo, defult=None):
         """判断正则是否匹配到的是否为空"""
@@ -176,6 +195,29 @@ class SingleTool(object):
             return time_difference
         else:
             return True
+
+    def parse_date_time(self, date_time_str):
+        """尝试解析日期时间字符串，支持两种格式：'YYYY-MM-DD HH:MM:SS' 和 'YYYY-MM-DD'"""
+        formats = ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d"]
+        for format in formats:
+            try:
+                return datetime.strptime(date_time_str, format)
+            except ValueError:
+                continue
+        raise ValueError(f"无法解析日期时间字符串: {date_time_str}")
+
+    def is_years_difference(self, date_time1_str, date_time2_str, years):
+        """判断两个日期时间间隔是否等于或超过指定的年数"""
+        # 解析日期时间字符串
+        date_time1 = self.parse_date_time(date_time1_str)
+        date_time2 = self.parse_date_time(date_time2_str)
+
+        # 计算两个日期之间的年数差
+        duration_in_years = (date_time2.year - date_time1.year) - (
+                (date_time1.month, date_time1.day) > (date_time2.month, date_time2.day))
+
+        # 判断年数差是否等于或超过指定的年数
+        return duration_in_years >= years
 
     def date_refix(self, str_date):
         flag = isinstance(str_date, list)
@@ -529,6 +571,21 @@ class SingleTool(object):
         table = f'<table>{row_data}</table>'
         return table
 
+    def list2table(self, list_data):
+        table_html = "<table border='1'>\n<thead>\n<tr>"
+        # 创建表头
+        for header in list_data[0]:
+            table_html += "<th>{}</th>".format(header)
+        table_html += "</tr>\n</thead>\n<tbody>\n"
+        # 创建表格数据行
+        for row in list_data:
+            table_html += "<tr>"
+            for val in row.values():
+                table_html += "<td>{}</td>".format(val)
+            table_html += "</tr>\n"
+        table_html += "</tbody>\n</table>"
+        return table_html
+
     def per_json(self, source_dict, json_path, get_num=1):
         result = jsonpath(source_dict, f'$..{json_path}')  # 如果取不到将返回False # 返回列表，如果取不到将返回False
         if isinstance(result, list) and (len(result) == 1 or get_num == 1):
@@ -590,10 +647,12 @@ class SingleTool(object):
         return data
 
     def hash(self, value, _mode):
+        """加速乐解密方法"""
         _hash = eval(f"hashlib.{_mode}(value.encode('utf-8')).hexdigest()")
         return _hash
 
     def get_clearance(self, item, cookie_name):
+        """加速乐解密方法"""
         ct = item.get('ct', None)
         bts = item.get('bts', None)
         chars = item.get('chars', None)
@@ -606,6 +665,7 @@ class SingleTool(object):
                     return f'{cookie_name}=' + value
 
     def jsl_second_cookie(self, cookie1, response):
+        """加速乐第二个cookie"""
         s = Selector(response=response)
         js = s.xpath('//text()').extract_first('').replace('document.cookie=', '').replace(
             'location.href=location.pathname+location.search', '')
@@ -622,6 +682,7 @@ class SingleTool(object):
             return cookie3
 
     def jsl_last_cookie(self, response, cookie_name='__jsl_clearance'):
+        """加速乐最后一个cookie"""
         s = Selector(response=response)
         js_text = s.xpath('//text()').extract_first('')
         param = self.deal_re(re.search(';go\((.*?)\)', js_text, re.S))
@@ -630,6 +691,7 @@ class SingleTool(object):
             return cookie4
 
     def js_results(self, js_path, *args):
+        """执行js文件，并获取返回值"""
         params = ''
         for i in args:
             if len(args) > 1:
@@ -642,6 +704,7 @@ class SingleTool(object):
         return results
 
     def base64_encode(self, data):
+        """base64编码"""
         if isinstance(data, dict):
             data = json.dumps(data)
         if isinstance(data, int):
@@ -650,10 +713,12 @@ class SingleTool(object):
         return data
 
     def base64_decode(self, data):
+        """base64解码"""
         data = base64.b64decode(data).decode('utf-8')
         return data
 
     def rs_server(self, html, cookies, link, js_path=r'js/rs_server/encrypt.js'):
+        """rs_server"""
         import sys, os
         sys.path.append(os.path.abspath(os.path.dirname(__file__)).split('js')[0])
         js_path = os.path.join(os.path.abspath(os.path.dirname(__file__)).split('library_tool')[0], js_path)
@@ -695,6 +760,7 @@ class SingleTool(object):
         return data
 
     def ocr_result(self, file_bytes):
+        """解析附件"""
         if len(file_bytes) > 10:
             stream = stream_type(file_bytes)
             result = []
@@ -703,6 +769,143 @@ class SingleTool(object):
             return result
         else:
             return []
+
+    def ocr_result_new(self, response):
+        """解析附件"""
+        file_bytes = response.content
+        header = response.headers
+        if len(file_bytes) > 10:
+            stream = stream_type(file_bytes, header)
+            result = []
+            if stream == 'pdf' or stream == 'jpg' or stream == 'png' or stream == 'doc'or stream == 'docx':
+                result = RecoFactory.reco_url(file_bytes, stream)
+            return result
+        else:
+            return []
+
+    def get_bucket(self):
+        return oss2.Bucket(oss2.Auth(access_key_id, access_key_secret), endpoint, bucket_name)
+
+    # def oss_push_img(self, url, data, suffix='', custom=False, header={}):
+    #     """
+    #     :param url: 详情页链接
+    #     :param data: 文件二进制数据流
+    #     return: 对外能访问的图片URL
+    #     """
+    #     if len(data) < 10:
+    #         return url
+    #     oss_bucket = self.get_bucket()
+    #     stream = stream_type(data, header)
+    #     if not stream and not custom:
+    #         suffix_list = ['.doc', '.docx', '.xlr', '.xls', '.xlsx', '.pdf', '.txt', '.jpg', '.png', '.rar', '.zip']
+    #         for i in suffix_list:
+    #             if url.endswith(i):
+    #                 suffix = i
+    #         if not suffix.startswith('.'):
+    #             suffix = '.' + suffix
+    #     elif stream and not custom:
+    #         suffix = '.' + stream
+    #     else:
+    #         if not suffix.startswith('.'):
+    #             suffix = '.' + suffix
+    #     if 'html' in suffix or suffix == '.':
+    #         return url
+    #     url_md5 = hashlib.sha1(url.encode()).hexdigest() + suffix
+    #     if self.spider_sign:
+    #         url_md5 = 'proposed/' + hashlib.sha1(url.encode()).hexdigest() + suffix
+    #     oss_bucket.put_object(url_md5, data)
+    #     oss_url = f'https://bid.snapshot.qudaobao.com.cn/{url_md5}'
+    #     self.cos_push_img(url, data, suffix, custom, header)
+    #     return oss_url
+
+    def get_cos_client(self):
+        # 配置COS参数
+        config = CosConfig(Region=region, SecretId=secret_id, SecretKey=secret_key)
+        client = CosS3Client(config)
+        return client
+
+    def get_cos_key(self, url, data, suffix='', custom=False, header={}):
+        """
+        :param url: 原始url
+        :param data: 文件二进制字节流
+        :param suffix: 自定义文件后缀
+        :param custom: 是否启动自定义文件后缀
+        :param header: 文件返回头信息
+        :return: 对外能访问的图片URL
+        """
+        if len(data) < 10:
+            return url
+        stream = stream_type(data, header)
+        if not stream and not custom:
+            suffix_list = ['.doc', '.docx', '.xlr', '.xls', '.xlsx', '.pdf', '.txt', '.jpg', '.png', '.rar', '.zip']
+            for i in suffix_list:
+                if url.endswith(i):
+                    suffix = i
+            if not suffix.startswith('.'):
+                suffix = '.' + suffix
+        elif stream and not custom:
+            suffix = '.' + stream
+        else:
+            if not suffix.startswith('.'):
+                suffix = '.' + suffix
+        if 'html' in suffix or suffix == '.':
+            return url
+        cos_key = hashlib.sha1(url.encode()).hexdigest() + suffix  # 上传到COS后的对象键
+        if self.spider_sign:
+            cos_key = 'proposed/' + hashlib.sha1(url.encode()).hexdigest() + suffix
+        return cos_key
+
+    def oss_push_img(self, url, data, suffix='', custom=False, header={}):
+        """
+        :param url: 原始url
+        :param data: 文件二进制数据流
+        return: 对外能访问的图片URL
+        """
+        cos_client = self.get_cos_client()
+        cos_key = self.get_cos_key(url, data, suffix, custom, header)
+        File_bytes = io.BytesIO(data)
+        f1 = io.BufferedReader(File_bytes)  # 转换成具有read属性的文件格式
+        # 使用高级接口断点续传，失败重试时不会上传已成功的分块(这里重试10次)
+        for i in range(10):
+            try:
+                cos_client.upload_file_from_buffer(Bucket=cos_bucket, Key=cos_key, Body=f1)
+                cos_url = f'https://your_domain/{cos_key}'
+                return cos_url
+            except CosClientError or CosServiceError as e:
+                print(e)
+
+    def oss_push_img_new(self, url, response, suffix='', custom=False):
+        """
+        :param url: 详情页链接
+        :param data: 文件二进制数据流
+        return: 对外能访问的图片URL
+        """
+        data = response.content
+        header = response.headers
+        if len(data) < 10:
+            return url
+        oss_bucket = self.get_bucket()
+        stream = stream_type(data, header)
+        if not stream and not custom:
+            suffix_list = ['.doc', '.docx', '.xlr', '.xls', '.xlsx', '.pdf', '.txt', '.jpg', '.png', '.rar', '.zip']
+            for i in suffix_list:
+                if url.endswith(i):
+                    suffix = i
+            if not suffix.startswith('.'):
+                suffix = '.' + suffix
+        elif stream and not custom:
+            suffix = '.' + stream
+        else:
+            if not suffix.startswith('.'):
+                suffix = '.' + suffix
+        if 'html' in suffix or suffix == '.':
+            return url
+        url_md5 = hashlib.sha1(url.encode()).hexdigest() + suffix
+        if self.spider_sign:
+            url_md5 = 'proposed/' + hashlib.sha1(url.encode()).hexdigest() + suffix
+        oss_bucket.put_object(url_md5, data)
+        oss_url = f'https://your_domain/{url_md5}'
+        return oss_url
 
     def check_fileurl(self, url):
         suffix_list = ['.doc', '.docx', '.xlr', '.xls', '.xlsx', '.pdf', '.txt', '.jpg', '.png', '.rar', '.zip']
@@ -713,3 +916,69 @@ class SingleTool(object):
                 continue
             else:
                 return False
+
+    def get_year_range(self, start_year, num_years):
+        """获取动态年份"""
+        year_range = [start_year]
+        for i in range(1, num_years + 1):
+            year_range.append(str(start_year + i))
+        return year_range
+
+    def get_current_year(self):
+        now = datetime.now()
+        return now.year
+
+    def youtube_dlod(self, url, save_dir, downloaded_path=''):
+        current_path = os.path.abspath(os.path.dirname(__file__)).split('library_tool')[0]
+        download_archive_path = f'{current_path}filed/downloaded.txt'
+        if downloaded_path:
+            download_archive_path = downloaded_path
+        os.makedirs(save_dir, exist_ok=True)
+        ydl_opts = {
+            'ignoreerrors': True,
+            'extractaudio': True,
+            'audioformat': "mp3",
+            'audioquality': 0,
+            'writeinfojson': True,
+            'writesubtitles': True,
+            'subtitlesformat': 'srt',
+            'download_archive': f'{download_archive_path}/downloaded.txt',
+            'embedthumbnail': True,
+            'addmetadata': True,
+            'outtmpl': f'{save_dir}/%(title)s_%(ext)s',
+            'format': 'mp3/bestaudio/best',
+            'logger': self.logger,
+            'progress_hooks': [self.my_hook],
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }]
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+
+    def get_link(self, up, tp, url, save_dir, downloaded_path=''):
+        current_path = os.path.abspath(os.path.dirname(__file__)).split('library_tool')[0]
+        download_archive_path = f'{current_path}filed/downloaded.txt'
+        if downloaded_path:
+            download_archive_path = downloaded_path
+        save_path = f'{save_dir}/urlfiles/'
+        os.makedirs(save_path, exist_ok=True)
+        ydl_opts = {
+            'download_archive': download_archive_path,
+            'ignoreerrors': True,
+            'outtmpl': f'{save_dir}/urlfiles/%(title)s_%(ext)s',
+            'writeinfojson': True,
+            'writesubtitles': True
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            video_info = ydl.extract_info(url, download=False)
+        with open(f'{save_path}{up}-{tp}-urls.txt', 'w', encoding='utf8') as wf:
+            tmp = []
+            for i, video in enumerate(video_info['entries']):
+                tmp.append(video['webpage_url'] + '\n')
+                if (i + 1) % 1000 == 0:  # 列表长度1000以后写入一次文件，再置空，防止内存溢出
+                    wf.writelines(tmp)
+                    tmp = []
+            wf.writelines(tmp)

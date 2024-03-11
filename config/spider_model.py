@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Author: yuanshaohang
-# @Date: 2020-02-23 09:56:50
-# @Version: 1.0.0
-# @Description: 爬虫模版文件
 import os
 import sys
 import time
@@ -23,11 +18,11 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)).split('spider')[0])
 from config.all_config import *
 
 
-class {{ Class_name }}Spider(Manager):
+class {{ Class_name }}Spider({{ kernel }}):
     name = '{{ model }}'{{ spider_sign }}
-
+    
     def __init__(self):
-        Manager.__init__(self)
+        {{ kernel }}.__init__(self)
         # self.online = True
         self.header = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'
@@ -70,8 +65,8 @@ def register_spider(spider_path: str, owner: str):
     :param owner: 所属人
     :return: 向调度平台注册
     """
-    url = ''  # 你的接口路由
-    data = ''  # 你的表单
+    url = "http://81.70.71.155:8889/liuqingchuan"
+    data = {'type': 'register', 'task_name': f'{spider_path}', 'group_name': 'kaifa', 'owner': owner, }
     response = requests.post(url=url, json=data)
     if response.status_code == 200:
         print(response.status_code, '增量爬虫注册成功')
@@ -108,7 +103,7 @@ def save_info(spider_name: str, spider_path: str, pages: int, remarks: str, sign
     :return: 保存爬虫信息到mysql
     """
     online_path = os.path.join('/home/bailian/single_process/', owner_path)
-    # register_spider(spider_path=online_path, owner=p.get_pinyin(owner, ''))
+    register_spider(spider_path=online_path, owner=p.get_pinyin(owner, ''))
     log_path_lats = os.path.join(log_path, f'{spider_name}.log')
     data = {
         'spider_name': spider_name,
@@ -131,19 +126,37 @@ def save_info(spider_name: str, spider_path: str, pages: int, remarks: str, sign
     cluster.insert(table='spiderdetails_info', data=log_data, is_info=False)
 
 
-def write_file(spider_name: str, file_path: str, sign: str):
+def write_file(spider_name: str, file_path: str, kernel: int, sign: str):
     """
     :param spider_name: 爬虫名称
     :param file_path: 爬虫文件路径
     :param sign: 任务标识
     :return: 生成爬虫文件
     """
+
+    if kernel == 1:
+        kernel = 'Manager'
+    elif kernel == 2:
+        kernel = 'ManagerRedis'
+    else:
+        kernel = 'ManagerMemory'
+
     spider_sign = f"""\n    spider_sign = '{sign}'""" if sign else ''
+
     with open(file_path, "w") as file:
-        file.write(model.render(Class_name=re_name(spider_name), model=spider_name, spider_sign=spider_sign))
+        file.write(model.render(Class_name=re_name(spider_name), model=spider_name,
+                                spider_sign=spider_sign, kernel=kernel))
 
 
-def production(spider_name: str, is_increment: bool, pages: int, owner: str, remarks: str, file_dir: str, sign=''):
+def production(
+        spider_name: str,
+        is_increment: bool,
+        pages: int,
+        owner: str,
+        remarks: str,
+        file_dir: str,
+        kernel: int = 1,
+        sign: str = ''):
     """
     :param spider_name: 爬虫名称
     :param is_increment: 是否增量
@@ -159,7 +172,7 @@ def production(spider_name: str, is_increment: bool, pages: int, owner: str, rem
         while 1:
             judge = input('是否覆盖(y/n)?')
             if judge == 'y':
-                write_file(spider_name, file_path, sign)
+                write_file(spider_name, file_path, kernel, sign)
                 print('创建爬虫文件\033[1;31;0m', spider_name, '\033[0m完成')
                 break
             if judge == 'n':
@@ -170,7 +183,7 @@ def production(spider_name: str, is_increment: bool, pages: int, owner: str, rem
     else:
         if not os.path.exists(spider_path):
             os.makedirs(spider_path)
-        write_file(spider_name, file_path, sign)
+        write_file(spider_name, file_path, kernel, sign)
         if is_increment:
             save_info(spider_name, file_path, pages, remarks, sign, owner, owner_path)
         print('创建爬虫文件\033[1;31;0m', spider_name, '\033[0m完成')

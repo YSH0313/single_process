@@ -69,14 +69,14 @@ class LoopGetter(object):
     def parse(self, response):
         pass
 
-    def parse_only(self, body):
+    def parse_only(self, task):
         pass
 
     def close_spider(self, **kwargs):
         pass
 
 
-class Manager(Basic, LoopGetter):
+class ManagerMemory(Basic, LoopGetter):
     name = None
     spider_sign = None
     custom_settings = {}
@@ -127,7 +127,7 @@ class Manager(Basic, LoopGetter):
             start_task = self.__getattribute__(start_fun.__name__)()
             if isinstance(start_task, Iterator):
                 for s in start_task:
-                    self.send_message(message=s)
+                    self.push(item=s)
         except:
             import traceback
             traceback.print_exc()
@@ -164,7 +164,7 @@ class Manager(Basic, LoopGetter):
 
             # 开启监控队列状态
             asyncio.run_coroutine_threadsafe(self.shutdown_spider(spider_name=self.name), self.shutdown_loop)
-            self.consumer_status = self.async_thread_pool.submit(self.get_message)  # 开启消费者
+            self.consumer_status = self.async_thread_pool.submit(self.consumer_memory)  # 开启消费者
             self.logger.info(f'Consumer thread open {str(self.consumer_status)}')
             self.work_list.append(self.consumer_status)
             wait(fs=self.work_list, timeout=None, return_when=ALL_COMPLETED)
@@ -177,7 +177,7 @@ class Manager(Basic, LoopGetter):
         while 1:
             now_time = time.time()
             self.logger.debug(
-                f"It's been {round(now_time - self.last_time, 2)} seconds since the last time I took data from the queue. The remaining number of queues is {self.getMessageCount()}")
+                f"It's been {round(now_time - self.last_time, 2)} seconds since the last time I took data from the queue. The remaining number of queues is {len(self._queue)}")
             if self.monitor and self.right_count:
                 pwd = os.getcwd()
                 spider_path = os.path.join(pwd, f'{self.name}.py')
@@ -195,7 +195,7 @@ class Manager(Basic, LoopGetter):
                 self.send_close_info()
                 break
             elif ((now_time - self.last_time >= Waiting_time) and (
-                    self.getMessageCount() == 0)):
+                    len(self._queue) == 0)):
                 if self.Environmental_judgment() and not self.monitor:
                     self.send_close_info()
                 try:
@@ -210,36 +210,49 @@ class Manager(Basic, LoopGetter):
                 break
             self.rm_task()  # 清除已结束的线程
             time.sleep(Delay_time)
-        self.close_spider()
         self.finished_info(self.starttime, self.start_time)  # 完成时的日志打印
         os._exit(0)  # 暂时重新启用，待观察
 
-    def Requests(self, ch, method, properties, body):
+    def consumer_memory(self):
+        '''
+        双端队列 右边弹出任务
+        :param keys: 键列表，默认为None（将获取所有任务的keys）
+        :return:
+        '''
+        try:
+            while True:
+                task = self.pop()
+                if task:
+                    self.Requests_memory(task)
+        except:
+            import traceback
+            traceback.print_exc()
+
+    def Requests_memory(self, task):
         """消息处理函数"""
         self.last_time = time.time()
         self.num -= 1
-        ch.basic_ack(delivery_tag=method.delivery_tag)  # 手动发送ack,如果没有发送,队列里的消息将会发给下一个worker
         while self.num < 0:
             self.logger.debug(f'The request queue is full，进程号为：{os.getpid()}')
             time.sleep(1)
-        flag = self.is_json(body.decode('utf-8'))
+        flag = self.is_json(task)
         if not flag:  # 判断是否为请求消息，如果不是的话
             if inspect.isgeneratorfunction(self.parse_only):
-                message = self.parse_only(body=body.decode('utf-8')).__next__()  # 获取生成器元素
+                message = self.parse_only(task=task).__next__()  # 获取生成器元素
                 callback = message.callback.__name__  # 获取callback函数名
                 self.callback_map[callback] = message.__dict__.get('level') or 0  # 定义callback优先级
                 message.level = self.callback_map[callback] + 1  # 增加消息优先级
-                self.async_thread_pool.submit(self.send_message, message=message, is_thread=True)  # 多线程数据处理
+                self.async_thread_pool.submit(self.push, item=message)  # 多线程数据处理
             else:
-                self.async_thread_pool.submit(self.parse_only, body=body.decode('utf-8'))  # 多线程数据处理
+                self.async_thread_pool.submit(self.parse_only, task=task)  # 多线程数据处理
 
             self.num += 1
         if flag:  # 判断是否为请求消息，如果是的话
-            self.make_params(body)
+            self.make_params(task)
 
-    def make_params(self, body):
+    def make_params(self, task):
         """获取并处理有关的参数"""
-        contents = json.loads(body.decode('utf-8'))
+        contents = json.loads(task)
         callback_demo = contents.get('callback')
         is_encode = contents.get('is_encode')
         url = contents.get('url')
@@ -266,20 +279,20 @@ class Manager(Basic, LoopGetter):
         meta = param[0]
         proxy = param[1] if meta.get('proxy') else proxy
         ignore_ip = contents.get('ignore_ip')
-        methods = 'POST' if contents.get('method') == 'POST' else 'GET'
+        methods = 'POST' if contents.get('method') == 'POST' else ('GET' if contents.get('method') == 'GET' else 'PATCH')
         timeout = timeout if timeout else TIME_OUT
         asyncio.run_coroutine_threadsafe(
-            self.make_Requests(method=methods, is_encode=is_encode, url=url, body=body,
+            self.make_Requests(method=methods, is_encode=is_encode, url=url, task=task,
                                headers=headers, params=params, data=data, json_params=json_params,
                                timeout=timeout, callback=callback_demo, dont_filter=dont_filter,
                                encoding=encoding, meta=meta, level=level, proxy=proxy,
                                verify_ssl=verify_ssl, is_file=is_file, retry_count=retry_count,
                                is_change=is_change, allow_redirects=allow_redirects,
-                               ignore_ip=ignore_ip, request_info=body.decode('utf-8')), self.new_loop)
+                               ignore_ip=ignore_ip, request_info=task), self.new_loop)
 
-    async def request_preprocess(self, body, url, proxy, is_change, meta, req_id, params, data, json_params, headers):
+    async def request_preprocess(self, task, url, proxy, is_change, meta, req_id, params, data, json_params, headers):
         """请求预处理"""
-        new_body = json.loads(body.decode('utf-8'))
+        new_task = json.loads(task)
         self.is_proxy = True if (len([False for i in Agent_whitelist if
                                       i in url]) == 0) and IS_PROXY == True else False
         if self.is_proxy == False:
@@ -288,7 +301,7 @@ class Manager(Basic, LoopGetter):
             proxy = await self.asy_rand_choi_pool()
             if self.is_sameip:
                 meta['proxy'] = proxy
-                new_body['meta']['proxy'] = proxy
+                new_task['meta']['proxy'] = proxy
         if self.is_proxy and proxy:
             self.send_log(req_id=req_id, code='10', log_level='INFO', url=url, message='取代理成功',
                           formdata=self.dic2params(params, data, json_params), show_url=meta.get('show_url'))
@@ -297,20 +310,17 @@ class Manager(Basic, LoopGetter):
                           formdata=self.dic2params(params, data, json_params), show_url=meta.get('show_url'))
         if isinstance(headers, dict):
             headers['User-Agent'] = await self.get_ua() if UA_PROXY else headers['User-Agent']
-        return new_body, proxy, headers, meta
+        return new_task, proxy, headers, meta
 
     async def asyn_request(self, method, url, headers, timeout, cookies, is_encode, **kwargs):
         """异步请求方法"""
         with async_timeout.timeout(timeout=timeout):
-            async with aiohttp.ClientSession(headers=headers, conn_timeout=timeout, cookies=cookies) as session:
-                # async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False, limit=25),
-                #                                  trust_env=True, headers=headers, conn_timeout=timeout,
-                #                                  cookies=cookies) as session:
+            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False, limit=25), trust_env=True, headers=headers, conn_timeout=timeout, cookies=cookies) as session:
                 async with session.request(method=method, url=URL(url, encoded=True) if is_encode else url, **kwargs) as response:
                     res = await response.read()
                     return response, res
 
-    async def make_Requests(self, method='GET', url=None, body=None, headers=None, params=None, data=None,
+    async def make_Requests(self, method='GET', url=None, task=None, headers=None, params=None, data=None,
                             json_params=None, cookies=None, timeout=None, callback=None, dont_filter=False,
                             encoding=None, meta=None, level=0, request_info=None, proxy=None, verify_ssl=None,
                             allow_redirects=True, is_file=False, retry_count=0, is_change=False, is_encode=None,
@@ -323,11 +333,11 @@ class Manager(Basic, LoopGetter):
                 if await self.contarst_data(url):
                     self.num += 1
                     return
-            new_body, proxy, headers, meta = await self.request_preprocess(body, url, proxy, is_change, meta, req_id,
+            new_task, proxy, headers, meta = await self.request_preprocess(task, url, proxy, is_change, meta, req_id,
                                                                            params, data, json_params, headers)
 
             while retry_count < max_request:
-                new_body['proxy'] = proxy = proxy if not ignore_ip else None
+                new_task['proxy'] = proxy = proxy if not ignore_ip else None
                 try:
                     self.send_log(req_id=req_id, code='01', log_level='INFO', url=url, message='即将发送请求',
                                   formdata=self.dic2params(params, data, json_params), show_url=meta.get('show_url'))
@@ -337,17 +347,17 @@ class Manager(Basic, LoopGetter):
                     # 打印日志
                     await self.infos(response.status, method, url, req_id, params, data, json_params, meta.get('show_url'))
 
-                    text = await self.deal_code(res=res, body=body, is_file=is_file, encoding=encoding)
-
-                    if '您的授权设置可能有问题' in text and '您当前的客户端IP地址为' in text:
-                        raise ProxyError(f'{proxy}代理并发数超限制')
+                    text = await self.deal_code(res=res, task=task, is_file=is_file, encoding=encoding)
+                    if text:
+                        if '您的授权设置可能有问题' in text and '您当前的客户端IP地址为' in text:
+                            raise ProxyError(f'{proxy}代理并发数超限制')
                     response_last = MyResponse(url=url, headers=response.headers, data=data, cookies=response.cookies,
                                                meta=meta, retry_count=retry_count, text=text, content=res,
                                                status_code=response.status, request_info=request_info, proxy=proxy,
                                                level=level, log_info={'req_id': req_id, 'params': params, 'data': data,
                                                                       'json_params': json_params})
                     await self.Iterative_processing(method=method, callback=callback,
-                                                    response_last=response_last, body=body, level=level,
+                                                    response_last=response_last, task=task, level=level,
                                                     retry_count=retry_count, req_id=req_id)
                     break
                 except (aiohttp.ClientProxyConnectionError, aiohttp.ServerTimeoutError, TimeoutError,
@@ -355,13 +365,13 @@ class Manager(Basic, LoopGetter):
                         aiohttp.ServerDisconnectedError, aiohttp.ClientConnectorError, aiohttp.ClientOSError,
                         aiohttp.ClientPayloadError) as e:
                     retry_count += 1
-                    await self.retry(method, url, retry_count, repr(e), new_body, req_id, params, data, json_params,
+                    await self.retry(method, url, retry_count, repr(e), new_task, req_id, params, data, json_params,
                                      meta.get('show_url'))
                     if self.is_proxy:
                         proxy = await self.asy_rand_choi_pool()
                         if self.is_sameip:
                             meta['proxy'] = proxy
-                            new_body['meta']['proxy'] = proxy
+                            new_task['meta']['proxy'] = proxy
 
                 except pdfminer.pdfparser.PDFSyntaxError as e:
                     response_last = MyResponse(url=url, headers={}, data=data, cookies=cookies, meta=meta,
@@ -369,21 +379,21 @@ class Manager(Basic, LoopGetter):
                                                log_info={'req_id': req_id, 'params': params, 'data': data,
                                                          'json_params': json_params})
                     await self.Iterative_processing(method=method, callback=callback, response_last=response_last,
-                                                    body=body, level=level, retry_count=retry_count, req_id=req_id)
+                                                    task=task, level=level, retry_count=retry_count, req_id=req_id)
 
                 except Exception as e:
                     if (not self.is_proxy) and (max_request):
                         retry_count += 1
-                        await self.retry(method, url, retry_count, repr(e), new_body, req_id, params, data, json_params,
+                        await self.retry(method, url, retry_count, repr(e), new_task, req_id, params, data, json_params,
                                          meta.get('show_url'))
-                        self.logger.error(f'{repr(e)} Returning to the queue {str(new_body)}', exc_info=True)
+                        self.logger.error(f'{repr(e)} Returning to the queue {str(new_task)}', exc_info=True)
                     else:
                         retry_count += 1
-                        mess = json.loads(body.decode('utf-8'))
+                        mess = task
                         mess['is_change'] = True
                         mess['retry_count'] = retry_count
-                        self.send_message(message=json.dumps(mess), is_thread=True)
-                        self.logger.error(f'{repr(e)} Returning to the queue {str(new_body)}', exc_info=True)
+                        self.push(item=mess)
+                        self.logger.error(f'{repr(e)} Returning to the queue {str(new_task)}', exc_info=True)
                         break
             else:
                 response_last = MyResponse(url=url, headers={}, data={}, cookies=None, meta=meta,
@@ -393,7 +403,7 @@ class Manager(Basic, LoopGetter):
                                            log_info={'req_id': req_id, 'params': params, 'data': data,
                                                      'json_params': json_params})
                 await self.Iterative_processing(method=method, callback=callback, response_last=response_last,
-                                                body=body, level=level, retry_count=retry_count, req_id=req_id)
+                                                task=task, level=level, retry_count=retry_count, req_id=req_id)
         except Exception as e:
             import traceback
             traceback.print_exc()
@@ -409,7 +419,7 @@ class Manager(Basic, LoopGetter):
             self.logger.info(f'Data already exists, the request has been skipped：{url}')
             return True
 
-    async def deal_code(self, res, body, is_file, encoding):
+    async def deal_code(self, res, task, is_file, encoding):
         """编码处理函数"""
         if is_file:
             text = ''
@@ -422,20 +432,20 @@ class Manager(Basic, LoopGetter):
             try:
                 text = res.decode(charset_code)
                 if not self.is_contain_chinese(text):
-                    text = await self.cycle_charset(res, body)  # 此处存疑
+                    text = await self.cycle_charset(res, task)  # 此处存疑
                 return text
             except (UnicodeDecodeError, TypeError, LookupError):
-                text = await self.cycle_charset(res, body)
+                text = await self.cycle_charset(res, task)
                 if not text:
                     text = str(res, charset_code, errors='replace')
                 return text
             except Exception as e:
-                self.logger.error(f'{repr(e)} Decoding error {body.decode("utf-8")}', exc_info=True)
+                self.logger.error(f'{repr(e)} Decoding error {task}', exc_info=True)
         else:
-            text = await self.cycle_charset(res, body)
+            text = await self.cycle_charset(res, task)
             return text
 
-    async def cycle_charset(self, res, body):
+    async def cycle_charset(self, res, task):
         """异常编码处理函数"""
         charset_code_list = ['utf-8', 'gbk', 'gb2312', 'utf-16']
         for code in charset_code_list:
@@ -445,11 +455,11 @@ class Manager(Basic, LoopGetter):
             except UnicodeDecodeError:
                 continue
             except Exception as e:
-                self.logger.error(f'{repr(e)} Decoding error {body.decode("utf-8")}', exc_info=True)
+                self.logger.error(f'{repr(e)} Decoding error {task}', exc_info=True)
 
-    async def Iterative_processing(self, method, callback, response_last, body, level, retry_count, req_id):
+    async def Iterative_processing(self, method, callback, response_last, task, level, retry_count, req_id):
         """迭代器及异常状态码处理函数"""
-        mess = json.loads(body.decode('utf-8'))
+        mess = task
         if (response_last.status_code != 200) and (response_last.status_code in retry_http_codes) and (
                 retry_count < max_request):
             mess['retry_count'] = retry_count = int(retry_count) + 1
@@ -458,14 +468,14 @@ class Manager(Basic, LoopGetter):
                 if self.is_sameip:
                     mess['meta']['proxy'] = mess['proxy']
             if (retry_count < max_request):
-                self.send_message(message=json.dumps(mess), is_thread=True)
+                self.push(item=mess)
                 await self.retry(method, response_last.url, str(retry_count),
                                  f'Wrong status code {response_last.status_code}', str(mess), req_id,
                                  mess.get('params'), mess.get('data'), mess.get('json_params'),
                                  mess['meta'].get('show_url'))
                 self.exc_count += 1
             elif (retry_count == max_request):
-                self.logger.debug(f'Give up <{body.decode("utf-8")}>')
+                self.logger.debug(f'Give up <{task}>')
                 self.fangqi_count += 1
                 response_last.retry_count = retry_count
                 await self.__deal_fun(callback=callback, response_last=response_last)
@@ -479,21 +489,21 @@ class Manager(Basic, LoopGetter):
                     mess['proxy'] = await self.asy_rand_choi_pool()
                     if self.is_sameip:
                         mess['meta']['proxy'] = mess['proxy']
-                self.send_message(message=json.dumps(mess), is_thread=True)
+                self.push(item=mess)
                 await self.retry(method, response_last.url, str(retry_count),
                                  f'Other wrong status code {response_last.status_code}', str(mess), req_id,
                                  mess.get('params'), mess.get('data'), mess.get('json_params'),
                                  mess['meta'].get('show_url'))
                 self.other_count += 1
             else:
-                self.logger.debug(f'Give up <{body.decode("utf-8")}>')
+                self.logger.debug(f'Give up <{task}>')
                 self.fangqi_count += 1
                 response_last.retry_count = retry_count
                 await self.__deal_fun(callback=callback, response_last=response_last)
             return
 
         if (retry_count == max_request):
-            self.logger.debug(f'Give up <{body.decode("utf-8")}>')
+            self.logger.debug(f'Give up <{task}>')
             self.fangqi_count += 1
             response_last.retry_count = retry_count
         await self.__deal_fun(callback=callback, response_last=response_last)
@@ -511,7 +521,7 @@ class Manager(Basic, LoopGetter):
                     if not c.level:
                         c.level = self.callback_map[callback]+1 if callback != callname else self.callback_map[callback]
                     # print(f'{callback}优先级：{c.level}')
-                    self.send_message(message=c, is_thread=True)
+                    self.push(item=c)
         except Exception as e:
             self.exec_count += 1
             self.send_log(req_id=response_last.log_info['req_id'], code='32', log_level='ERROR', url=response_last.url,

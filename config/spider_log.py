@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
-# @Author: yuanshaohang
-# @Date: 2020-02-23 09:56:50
-# @Version: 1.0.0
-# @Description: 爬虫日志文件类
 import sys
 import logging
 from settings import log_path, log_level
+import logging.handlers
 
 """
 format参数值说明：
@@ -23,15 +20,20 @@ format参数值说明：
 %(message)s: 打印日志信息
 """
 
+
 class NoParsingFilter(logging.Filter):
-  def filter(self, record):
-    if record.name.startswith('asyncio_config.manager'):
-      return False
-    return True
+    def filter(self, record):
+        if record.name.startswith('asyncio_config.manager'):
+            return False
+        return True
+
 
 logging.getLogger("root").setLevel(logging.WARNING)
+
+
 class SpiderLog(object):
     name = None
+
     def __init__(self, custom_settings=None):
         if custom_settings:
             for varName, value in custom_settings.items():
@@ -48,11 +50,14 @@ class SpiderLog(object):
                      'WARNING': logging.WARNING, 'ERROR': logging.ERROR}
         if log_path:
             format_file = logging.Formatter('%(asctime)s [%(name)s] %(levelname)s: %(message)s',
-                                           datefmt="%Y-%m-%d %H:%M:%S")  # 设置日志格式
+                                            datefmt="%Y-%m-%d %H:%M:%S")  # 设置日志格式
             if sys.platform == 'linux':
-                format_str = logging.Formatter('%(asctime)s [%(name)s] %(levelname)s: %(message)s', datefmt="%Y-%m-%d %H:%M:%S")  # 设置日志格式
+                format_str = logging.Formatter('%(asctime)s [%(name)s] %(levelname)s: %(message)s',
+                                               datefmt="%Y-%m-%d %H:%M:%S")  # 设置日志格式
             else:
-                format_str = logging.Formatter('\033[5;33;1m%(asctime)s\033[0m \033[5;32;1m[%(name)s]\033[0m \033[5;35;1m%(levelname)s:\033[0m \033[5;36;1m%(message)s\033[0m', datefmt="%Y-%m-%d %H:%M:%S")  # 设置日志格式
+                format_str = logging.Formatter(
+                    '\033[5;33;1m%(asctime)s\033[0m \033[5;32;1m[%(name)s]\033[0m \033[5;35;1m%(levelname)s:\033[0m \033[5;36;1m%(message)s\033[0m',
+                    datefmt="%Y-%m-%d %H:%M:%S")  # 设置日志格式
             self.logger.setLevel(level_map[log_level])  # 设置屏幕日志级别
             if self.pages:
                 pass
@@ -61,7 +66,10 @@ class SpiderLog(object):
                 console.setFormatter(format_str)  # 设置屏幕上显示的格式
                 self.logger.addHandler(console)  # 把屏幕对象加到logger里
 
-            th = logging.FileHandler(filename=log_path+'/{spider_name}.log'.format(spider_name=self.path_name), mode='w', encoding='utf-8')
+            th = logging.handlers.RotatingFileHandler(filename=log_path + '/{spider_name}.log'.format(spider_name=self.path_name),
+                                     mode='w', encoding='utf-8', maxBytes=100 * 1024 * 1024)
+            # th = logging.FileHandler(filename=log_path + '/{spider_name}.log'.format(spider_name=self.path_name),
+            #                          mode='w', encoding='utf-8')
             th.setFormatter(format_file)  # 设置文件里写入的格式
             self.logger.addHandler(th)  # 把对象加到logger里
 
@@ -70,6 +78,10 @@ class SpiderLog(object):
             logging.basicConfig(level=level_map[log_level],
                                 format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
                                 datefmt="%Y-%m-%d %H:%M:%S")
+
+    def my_hook(self, d):
+        if d['status'] == 'finished':
+            self.logger.info('Done downloading, now converting ...')
 
     def func(self):
         self.logger.info("Start print log")

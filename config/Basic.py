@@ -9,11 +9,12 @@ import os
 
 import json
 import logging
+from concurrent.futures import ThreadPoolExecutor
+
 import requests
 
 from middleware.proxys import Proxy_midddwaer
 from middleware.Cluster import Cluster
-# from MQ.mq import Mq
 from MQ.mq_upgrade import MqProducer
 
 s = requests.session()
@@ -37,6 +38,12 @@ class Basic(Cluster, MqProducer, Proxy_midddwaer):
             Cluster.__init__(self, key=queue_name)
         self.s = requests.session()
         self.logger.name = logging.getLogger(__name__).name
+        self.async_thread_pool = ThreadPoolExecutor()  # 线程池
+        self.work_list = []  # 线程子任务池
+
+    def rm_task(self):
+        """移除已结束的线程子任务池"""
+        [self.work_list.remove(i) for i in self.work_list if i.done()]
 
     def send_start_info(self):
         pass
@@ -65,19 +72,46 @@ class Basic(Cluster, MqProducer, Proxy_midddwaer):
         close_info['End_time'] = f'结束时间  --  {self.now_time()}'
         close_info['Total_time'] = "总耗时  --  %d时:%02d分:%02d秒" % (h, m, s)
         self.logger.info('\r\n' + json.dumps(close_info, indent=2, ensure_ascii=False))
+
+        # 根据结束日志去处理后续业务
         # self.spider_info_save(close_info)
-        spider_name = self.path_name.replace('_add', '')
-        if self.pages:
-            if self.error_count and self.catch_count and not exec_info:
-                bili = round(self.error_count / self.catch_count, 2)
-                if bili > 0.2:
-                    baifenbi = '%.f%%' % (bili * 100)
-                    self.warring_deal(spider_name=spider_name, baifenbi=baifenbi)
-            elif exec_info:
-                self.warring_deal(spider_name=spider_name, baifenbi=0)
+        # spider_name = self.path_name.replace('_add', '')
+        # if self.pages:
+        #     if self.error_count and self.catch_count and not exec_info:
+                # bili = round(self.error_count / self.catch_count, 2)
+                # if bili > 0.2:
+                #     baifenbi = '%.f%%' % (bili * 100)
+                #     self.warring_deal(spider_name=spider_name, baifenbi=baifenbi)
+                # self.send_fix_message()
+            # elif exec_info:
+            #     self.warring_deal(spider_name=spider_name, baifenbi=0)
         # data_bi = round(self.right_count/self.Estimated_total, 2)
         # if data_bi < 0.9:
         #     send_weixin()
+
+    def get_fix_message(self):
+        pass
+        # query = {
+        #     "_source": ["domain"],
+        #     "size": 1,
+        #     "query": {
+        #         "match_phrase": {
+        #             "source": self.source
+        #         }
+        #     }
+        # }
+        # domain = self.per_json(self.es.search(index='your index name', body=query), 'xxx.xxx')
+        # if domain:
+        #     fix_message = {'host': domain, 'name': self.source, 'description': f'缺少{self.miss_filed}字段', 'origin': '结果异常',
+        #                    'remark': self.spider_path}  # 开发平台的监测异常
+        #     return fix_message
+
+    def send_fix_message(self):
+        fix_message = self.get_fix_message()
+        if fix_message:
+            # self.producer.send('weihuweb', json.dumps(fix_message).encode('utf-8'))
+            # self.producer.flush()
+            print('发送成功', fix_message)
 
     def handle_item(self, close_info):
         start_time = self.select(table='spiderdetails_info', columns='MAX(`start_time`)',

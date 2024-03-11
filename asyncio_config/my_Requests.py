@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Author: yuanshaohang
-# @Date: 2020-02-23 09:56:50
-# @Version: 1.0.0
-# @Description: 自定义的请求体和返回体
 import re
 import sys
 
@@ -43,6 +38,33 @@ class MyRequests(object):
 
 class MyFormRequests(object):
     def __init__(self, url, method='POST', headers=None, params=None, data=None, json_params=None, cookies=None,
+                 timeout=30, callback=None, proxy=None, level=0, verify_ssl=None, allow_redirects=True, is_file=False,
+                 retry_count=0, is_change=False, is_encode=None, ignore_ip=False, dont_filter=False, encoding=None, **meta):
+        self.method = method  # 请求类型
+        self.url = url  # 目标url
+        self.params = params  # 目标url
+        self.data = data  # 进行post请求时的参数
+        self.json_params = json_params  # 进行post请求时json的参数
+        self.headers = headers  # header头
+        self.cookies = cookies  # 需要添加的cookie
+        self.timeout = 120 if is_file and timeout == 30 else timeout  # 超时时间
+        self.callback = callback  # 回调目标函数
+        self.meta = {} if not meta.get('meta') else meta.get('meta')  # 需要传递的参数（字典格式）
+        self.proxy = proxy  # 需要添加的代理ip
+        self.level = level  # 请求优先级
+        self.verify_ssl = False if ('https' in url) and (not verify_ssl) else verify_ssl  # 是否禁用网站证书
+        self.allow_redirects = allow_redirects  # 是否允许重定向
+        self.is_file = is_file  # 是否是文件地址
+        self.retry_count = retry_count
+        self.is_change = is_change
+        self.is_encode = is_encode
+        self.ignore_ip = ignore_ip
+        self.dont_filter = dont_filter  # 是否对当前url进行去重访问
+        self.encoding = encoding  # 编码格式
+
+
+class MyPatchRequests(object):
+    def __init__(self, url, method='PATCH', headers=None, params=None, data=None, json_params=None, cookies=None,
                  timeout=30, callback=None, proxy=None, level=0, verify_ssl=None, allow_redirects=True, is_file=False,
                  retry_count=0, is_change=False, is_encode=None, ignore_ip=False, dont_filter=False, encoding=None, **meta):
         self.method = method  # 请求类型

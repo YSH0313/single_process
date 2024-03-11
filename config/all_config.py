@@ -34,12 +34,9 @@ from multiprocessing import Pool
 from urllib.parse import urljoin
 from scrapy.selector import Selector
 # from parsel import Selector
-
-sys.path.append('/root/shaohang/single_process/config')
-
-sys.path.append('/root/shaohang/single_process/asyncio_config')
 from asyncio_config.manager import Manager
 from asyncio_config.manager_redis import ManagerRedis
+from asyncio_config.manager_memory import ManagerMemory
 from asyncio_config.my_Requests import *
 from items import *
 

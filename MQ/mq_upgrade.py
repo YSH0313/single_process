@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # @Author: yuanshaohang
-# @Date: 2020-02-23 09:56:50
+# @Date: 2023-02-23- 09:56:50
 # @Version: 1.0.0
 # @Description: rabbitmq队列中间件
 import sys
@@ -14,8 +14,8 @@ from library_tool.sugars import retrying
 from concurrent.futures import ThreadPoolExecutor
 
 from items import *
-from asyncio_config.my_Requests import MyFormRequests, MyRequests
-from settings import Rabbitmq, message_ttl, Auto_clear, X_MAX_PRIORITY
+from asyncio_config.my_Requests import MyFormRequests, MyRequests, MyPatchRequests
+from settings import Rabbitmq, message_ttl, Auto_clear, X_MAX_PRIORITY, IS_connection
 
 
 class MqProducer:
@@ -30,10 +30,8 @@ class MqProducer:
         self.rabbit_host = Rabbitmq['host']  # 连接mq的各项参数
         self.rabbit_port = Rabbitmq['port']  # 连接mq的各项参数
         self.vhost_check = '%2F'  # 连接mq的各项参数
-        self.async_thread_pool = ThreadPoolExecutor()  # 线程池
         self.connections = Queue(maxsize=10)  # 连接池
         self.lock = threading.Lock()  # 线程锁
-        self.work_list = []  # 线程子任务池
         self.operating_system = sys.platform  # 运行平台
         self.pages = sys.argv[1] if len(sys.argv) > 1 else None
         self.queue_name = self.make_queue_name(queue_name)
@@ -43,9 +41,10 @@ class MqProducer:
         if Auto_clear:
             self.delete_queue()
 
-        self.send_channel = self.conn()
+        if IS_connection:
+            self.send_channel = self.conn()
 
-        self.thread_channel = self.conn()
+            self.thread_channel = self.conn()
 
     def obj_json(self, obj):
         """json格式化调用函数"""
@@ -78,10 +77,6 @@ class MqProducer:
         count = dic.get('messages', 0)
         # print('队列长度', count)
         return count
-
-    def rm_task(self):
-        """移除已结束的线程子任务池"""
-        [self.work_list.remove(i) for i in self.work_list if i.done()]
 
     def delete_queue(self):
         channel = self.conn()
@@ -145,7 +140,7 @@ class MqProducer:
 
     def make_data(self, message):
         """构造消息体"""
-        if (isinstance(message, MyFormRequests)) or (isinstance(message, MyRequests)):
+        if (isinstance(message, MyFormRequests)) or (isinstance(message, MyRequests) or (isinstance(message, MyPatchRequests))):
             mess_demo = {}
             fun_name = ''
             for k, v in message.__dict__.items():
@@ -194,34 +189,16 @@ class MqProducer:
             channel.basic_consume(queue=self.queue_name, on_message_callback=self.Requests)
             channel.start_consuming()
 
-    def async_send_message(self, message):
-        """异步发送消息"""
-        self.async_thread_pool.submit(self.send_message, message=message)
-
-    def start(self, **kwargs):
-        """开始发送消息"""
-        for i in range(100):
-            message = i
-            self.send_message(str(message), **kwargs)  # 单进程发送
-            # self.async_send_message(message)  # 线程池发送
-
     def Requests(self, ch, method, properties, body):  # 消息处理函数
         print(['X'], body.decode('utf-8'))
         ch.basic_ack(delivery_tag=method.delivery_tag)  # 手动发送ack,如果没有发送,队列里的消息将会发给下一个worker
 
         # print(self.getMessageCount())
 
-    def rrr(self):
-        self.async_thread_pool.submit(self.start)
-        self.async_thread_pool.submit(self.get_message)
-        # print('==================================================')
-        # self.async_thread_pool.submit(self.start, is_thread=True)
-
 
 if __name__ == '__main__':
     start_time = time.time()
     producer = MqProducer(queue_name='first_spider')
-    producer.rrr()
     end_time = time.time()
     total = (end_time - start_time)
     print(total)
