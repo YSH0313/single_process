@@ -10,6 +10,7 @@ from middleware.Cluster import Cluster
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE_DIR)
 from jinja2 import Template
+from settings import IS_connection
 
 model = Template("""# -*- coding: utf-8 -*-
 import os
@@ -138,7 +139,7 @@ def write_file(spider_name: str, file_path: str, kernel: int, sign: str):
         kernel = 'Manager'
     elif kernel == 2:
         kernel = 'ManagerRedis'
-    else:
+    elif kernel == 3:
         kernel = 'ManagerMemory'
 
     spider_sign = f"""\n    spider_sign = '{sign}'""" if sign else ''
@@ -155,7 +156,7 @@ def production(
         owner: str,
         remarks: str,
         file_dir: str,
-        kernel: int = 1,
+        kernel: int = 3,
         sign: str = ''):
     """
     :param spider_name: 爬虫名称
