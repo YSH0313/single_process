@@ -11,4 +11,5 @@ from config.spider_model import production
 # 所属人名称
 # 备注信息
 # 要创建的爬虫路径（路径不存在时自动创建）
+# 需要使用的核心引擎（默认优先使用内存优先级队列，kernel默认为1，2为rabbitmq队列，3为redis队列）
 production('my_first', True, 5, '用户', '第一个爬虫', 'your_spider/my_first/')

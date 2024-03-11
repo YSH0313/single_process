@@ -48,24 +48,24 @@ class SpiderLog(object):
         # self.logger.addFilter(NoParsingFilter())
         level_map = {'INFO': logging.INFO, 'DEBUG': logging.DEBUG,
                      'WARNING': logging.WARNING, 'ERROR': logging.ERROR}
-        if log_path:
-            format_file = logging.Formatter('%(asctime)s [%(name)s] %(levelname)s: %(message)s',
-                                            datefmt="%Y-%m-%d %H:%M:%S")  # 设置日志格式
-            if sys.platform == 'linux':
-                format_str = logging.Formatter('%(asctime)s [%(name)s] %(levelname)s: %(message)s',
-                                               datefmt="%Y-%m-%d %H:%M:%S")  # 设置日志格式
-            else:
-                format_str = logging.Formatter(
-                    '\033[5;33;1m%(asctime)s\033[0m \033[5;32;1m[%(name)s]\033[0m \033[5;35;1m%(levelname)s:\033[0m \033[5;36;1m%(message)s\033[0m',
-                    datefmt="%Y-%m-%d %H:%M:%S")  # 设置日志格式
-            self.logger.setLevel(level_map[log_level])  # 设置屏幕日志级别
-            if self.pages:
-                pass
-            else:
-                console = logging.StreamHandler()  # 往屏幕上输出
-                console.setFormatter(format_str)  # 设置屏幕上显示的格式
-                self.logger.addHandler(console)  # 把屏幕对象加到logger里
+        format_file = logging.Formatter('%(asctime)s [%(name)s] %(levelname)s: %(message)s',
+                                        datefmt="%Y-%m-%d %H:%M:%S")  # 设置日志格式
+        if sys.platform == 'linux':
+            format_str = logging.Formatter('%(asctime)s [%(name)s] %(levelname)s: %(message)s',
+                                           datefmt="%Y-%m-%d %H:%M:%S")  # 设置日志格式
+        else:
+            format_str = logging.Formatter(
+                '\033[5;33;1m%(asctime)s\033[0m \033[5;32;1m[%(name)s]\033[0m \033[5;35;1m%(levelname)s:\033[0m \033[5;36;1m%(message)s\033[0m',
+                datefmt="%Y-%m-%d %H:%M:%S")  # 设置日志格式
+        self.logger.setLevel(level_map[log_level])  # 设置屏幕日志级别
+        if self.pages:
+            pass
+        else:
+            console = logging.StreamHandler()  # 往屏幕上输出
+            console.setFormatter(format_str)  # 设置屏幕上显示的格式
+            self.logger.addHandler(console)  # 把屏幕对象加到logger里
 
+        if log_path:
             th = logging.handlers.RotatingFileHandler(filename=log_path + '/{spider_name}.log'.format(spider_name=self.path_name),
                                      mode='w', encoding='utf-8', maxBytes=100 * 1024 * 1024)
             # th = logging.FileHandler(filename=log_path + '/{spider_name}.log'.format(spider_name=self.path_name),
@@ -73,11 +73,10 @@ class SpiderLog(object):
             th.setFormatter(format_file)  # 设置文件里写入的格式
             self.logger.addHandler(th)  # 把对象加到logger里
 
-        else:
-            # print('没有')
-            logging.basicConfig(level=level_map[log_level],
-                                format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
-                                datefmt="%Y-%m-%d %H:%M:%S")
+        # else:
+        #     logging.basicConfig(level=level_map[log_level],
+        #                         format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
+        #                         datefmt="%Y-%m-%d %H:%M:%S")
 
     def my_hook(self, d):
         if d['status'] == 'finished':

@@ -75,8 +75,7 @@ Delay_time = 4  # 自动关闭程序最大延迟时间
 
 # custom_settings = {}
 
-log_path = 'your_path'  # 日志保存路径
-# log_path = ''  # 日志保存路径
+log_path = ''  # 日志保存路径
 log_level = 'DEBUG'  # 日志级别
 
 # 邮件发送
@@ -112,3 +111,4 @@ MONGO_CONFIG = {
     'MONGODB_PORT': "your_port",
     'MONGODB_BASE': "your_base"
 }
+MONGO_client = False

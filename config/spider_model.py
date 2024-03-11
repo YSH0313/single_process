@@ -164,7 +164,9 @@ def production(
     :param pages: 增量页码
     :param owner: 所属人
     :param remarks: 备注
-    :param file_path: 文件路径
+    :param file_dir: 文件路径
+    :param kernel: 需要使用的核心引擎，默认为1，2表示使用rabbitmq作为队列，3表示使用redis作为队列
+    :param sign: 需要对爬虫的额外标记
     :return: 根据所给的参数创建爬虫文件
     """
     spider_path, file_path, owner_path = get_path(spider_name, file_dir)

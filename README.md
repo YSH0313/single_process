@@ -7,7 +7,7 @@ single_process是一款可以帮助你快速开发一个网络爬虫应用的一
 
 ### 前置条件
     - python3.7及以上版本
-    - rabbitmq或者redis队列
+    - rabbitmq或者redis队列，最新版本新增了基于内存的优先级队列（默认优先使用内存优先级队列）
     - 执行my_sh目录下的spiderlist_monitor.sql文件，用来生成爬虫注册表
 ### 安装说明
     - git clone https://github.com/YSH0313/single_process.git
@@ -19,14 +19,15 @@ single_process是一款可以帮助你快速开发一个网络爬虫应用的一
 ### 创建爬虫
 - 1、打开Production_spider.py文件，根据里面的提示填写信息，完成后运行即可创建
 #### 示例：
-- `production("my_first", True, 5, "用户", "第一个爬虫", "your_spider/my_first/")`
-- 2、找到对应的爬虫文件进行相应的代码书写
+- `production("my_first", True, 5, "[开发者]", "第一个爬虫", "your_spider/my_first/")`
+- production具体参数请自行进入源码部分查看，每一项参数都有相应说明
+- 在spider目录下找到对应的爬虫文件进行相应的代码书写
 
 ### item配置
 - 在items.py文件中配置自己爬虫所需要的字段
 - 要符合类似于下面这样的结构，且必须继承SingleItem父类
 - ```
-  class BiddingItem(SingleItem):
+  class BiddingItem(SingleItem):  # BiddingItem为item名称
         def __init__(self):
-            sele.name = None
+            sele.name = None  # 这里表示我们有一个name字段预占位
   ```

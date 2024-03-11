@@ -21,7 +21,7 @@ import hmac
 from filestream_y.FileStream_y import stream_type
 
 
-class first_spider(Manager):
+class first_spider(ManagerMemory):
     name = 'first_spider'
     custom_settings = {
         # 'retry_http_codes': [202, 412],
@@ -35,7 +35,7 @@ class first_spider(Manager):
     }
 
     def __init__(self):
-        Manager.__init__(self)
+        ManagerMemory.__init__(self)
         # self.online = True
         self.header = {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
@@ -44,7 +44,7 @@ class first_spider(Manager):
         # self.pages = True
 
     def start_requests(self):
-        for i in range(100):
+        # for i in range(100):
             url = 'https://www.baidu.com'
             yield MyRequests(url=url, headers=self.header, callback=self.parse)
 

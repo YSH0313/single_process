@@ -29,7 +29,7 @@ from config.Basic import Basic
 from asyncio_config.my_Requests import MyResponse
 from concurrent.futures import wait, ALL_COMPLETED
 from settings import PREFETCH_COUNT, TIME_OUT, IS_PROXY, IS_SAMEIP, Asynch, Waiting_time, Delay_time, \
-    max_request, Agent_whitelist, retry_http_codes, UA_PROXY
+    max_request, Agent_whitelist, retry_http_codes, UA_PROXY, IS_INSERT
 
 shutdown_lock = threading.Lock()
 
@@ -105,21 +105,22 @@ class ManagerMemory(Basic, LoopGetter):
 
     def open_spider(self, spider_name: str):
         """开启spider第一步检查状态"""
-        data = self.select(table='spiderlist_monitor', columns=['owner', 'remarks'],
-                           where=f"""spider_name = '{spider_name}'""")
-        if data:
-            self.owner = self.per_json(data, '[0].owner')
-            self.source = self.per_json(data, '[0].remarks')
-        if data and self.operating_system == 'linux' and self.pages and len(sys.argv) > 1:
-            self.update(table='spiderlist_monitor', set_data={'is_run': 'yes', 'start_time': self.now_time()},
-                        where=f"""`spider_name` = '{spider_name}'""")
-            if not self.monitor:
-                self.send_start_info()
-        elif not data:
-            self.logger.info(
-                'If you need to turn on increment, please register and try to run again. If not, please ignore it')
-            self.logger.info(f'Crawler service startup for {spider_name}')
-        self.logger.info('Crawler program starts')
+        if IS_INSERT:
+            data = self.select(table='spiderlist_monitor', columns=['owner', 'remarks'],
+                               where=f"""spider_name = '{spider_name}'""")
+            if data:
+                self.owner = self.per_json(data, '[0].owner')
+                self.source = self.per_json(data, '[0].remarks')
+            if data and self.operating_system == 'linux' and self.pages and len(sys.argv) > 1:
+                self.update(table='spiderlist_monitor', set_data={'is_run': 'yes', 'start_time': self.now_time()},
+                            where=f"""`spider_name` = '{spider_name}'""")
+                if not self.monitor:
+                    self.send_start_info()
+            elif not data:
+                self.logger.info(
+                    'If you need to turn on increment, please register and try to run again. If not, please ignore it')
+                self.logger.info(f'Crawler service startup for {spider_name}')
+            self.logger.info('Crawler program starts')
         return True
 
     def make_start_request(self, start_fun: {__name__}):

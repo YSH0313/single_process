@@ -38,7 +38,7 @@ class MqProducer:
         self.req_s = requests.session()
         self.callback_map = {}  # 回调函数优先级map表
 
-        if Auto_clear:
+        if Auto_clear and IS_connection:
             self.delete_queue()
 
         if IS_connection:

@@ -25,7 +25,7 @@ from elasticsearch import Elasticsearch
 from rediscluster import RedisCluster
 from asyncio_config.my_Requests import MyRequests, MyFormRequests
 from settings import (REDIS_HOST_LISTS, Mysql, redis_connection, kafka_servers, kafka_connection, ES_CONFIG, IS_INSERT,
-                      IS_ES, MONGO_CONFIG)
+                      IS_ES, MONGO_CONFIG, MONGO_client)
 
 # from middleware.pymysqlpool.pymysqlpool import ConnectionPool
 from library_tool.single_tool import SingleTool
@@ -643,11 +643,12 @@ class MongoDBManager(ParentObj):
         MONGODB_HOST = MONGO_CONFIG['MONGODB_HOST']
         MONGODB_PORT = MONGO_CONFIG['MONGODB_PORT']
         MONGODB_BASE = MONGO_CONFIG['MONGODB_BASE']
-        try:
-            self.mongo_client = pymongo.MongoClient(f"mongodb://{MONGODB_HOST}:{MONGODB_PORT}/")
-            self.mong_db = self.mongo_client[MONGODB_BASE]
-        except (ConnectionFailure, AutoReconnect) as e:
-            raise Exception(f"Failed to connect to MongoDB: {e}")
+        if MONGO_client:
+            try:
+                self.mongo_client = pymongo.MongoClient(f"mongodb://{MONGODB_HOST}:{MONGODB_PORT}/")
+                self.mong_db = self.mongo_client[MONGODB_BASE]
+            except (ConnectionFailure, AutoReconnect) as e:
+                raise Exception(f"Failed to connect to MongoDB: {e}")
 
     def insert_data(self, collection_name, data):
         try:
