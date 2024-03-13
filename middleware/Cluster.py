@@ -465,8 +465,6 @@ class KafkaDb(ParentObj):
             if self.online and not self.monitor:
                 topic = kafka_servers['topic'] if key_judge and value_judge else 'proposed_tasks_mid'
                 self.producer.send(topic, json.dumps(item).encode('utf-8'))
-            self.send_log(req_id=0, code='40', log_level='INFO', url=item['url'], message='数据存储kafka成功',
-                          show_url=item.get('show_url', ''))
             self.prints(item, is_replace=False, db='kafka', sgin='data_test' if not self.online else '')
             # self.add_url_sha1(item['url']) if not item.get('show_url') else (self.add_url_sha1(item['url']), self.add_url_sha1(item.get('show_url'), sgin='show_'))
             self.right_count += 1
@@ -477,31 +475,8 @@ class KafkaDb(ParentObj):
             self.miss_filed = debug_info
             self.logger.debug(
                 f'\033[5;31;1m{debug_info} \033[5;33;1mfield does not exist, Data validation failed, please check！\033[0m {item}')
-            self.send_log(req_id=0, code='31', log_level='WARN', url=item['url'],
-                          message=f'抓取结果缺少{debug_info}字段',
-                          show_url=item.get('show_url'))
             self.error_count += 1
         self.catch_count += 1
-
-    def send_log(self, req_id, code, log_level, url, message, time='', formdata='', show_url=''):
-        log_info = {
-            'log_id': self.get_inttime(),
-            'req_id': req_id,
-            'crawler_time': self.get_inttime(is_int=False),
-            'crawler_name': self.source,
-            'crawler_source': 2,
-            'log_level': log_level,
-            'code': code,
-            'url': url,
-            'message': message,
-            'time': time if time else '',
-            'crawler_author': self.owner,
-            'formdata': formdata if formdata else '',
-            'show_url': show_url if show_url else ''
-        }
-        if self.online:
-            self.producer.send('qdb_crawler_log_online_topic', json.dumps(log_info).encode('utf-8'))
-            self.logger.info(f'Log details：{log_info}')
 
 
 class RedisDb(ParentObj):

@@ -186,12 +186,12 @@ class ManagerRedis(Basic, LoopGetter):
                                 where=f"""`spider_name` = '{spider_name}'""")
                 except Exception as e:
                     self.logger.error("Crawler closed, abnormal update of running status", exc_info=True)
-                self.finished_info(self.starttime, self.start_time)  # 完成时的日志打印
-                os._exit(0)  # 存疑
-                # stop_thread(self.consumer_status)
-                # self.r.connection_pool.disconnect()
                 break
+            self.rm_task()  # 清除已结束的线程
             time.sleep(Delay_time)
+        self.close_spider()
+        self.finished_info(self.starttime, self.start_time)  # 完成时的日志打印
+        os._exit(0)  # 暂时重新启用，待观察
 
     def consumer_redis(self, keys=None, priority=True):
         '''
@@ -381,11 +381,6 @@ class ManagerRedis(Basic, LoopGetter):
                     self.push_task(key=self.key, tasks=c, level=c.level)
         except Exception as e:
             self.exec_count += 1
-            # self.send_log(req_id=response_last.log_info['req_id'], code='32', log_level='ERROR', url=response_last.url,
-            #               message='爬虫逻辑报错',
-            #               formdata=self.dic2params(response_last.log_info['params'], response_last.log_info['data'],
-            #                                        response_last.log_info['json_params']),
-            #               show_url=response_last.meta.get('show_url'))
             # if self.exec_count >= 100 and self.pages:
             #     import os
             #     self.finished_info(self.starttime, self.start_time, exec_info=True)  # 完成时的日志打印

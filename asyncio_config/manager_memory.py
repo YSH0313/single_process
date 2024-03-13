@@ -179,26 +179,8 @@ class ManagerMemory(Basic, LoopGetter):
             now_time = time.time()
             self.logger.debug(
                 f"It's been {round(now_time - self.last_time, 2)} seconds since the last time I took data from the queue. The remaining number of queues is {len(self._queue)}")
-            if self.monitor and self.right_count:
-                pwd = os.getcwd()
-                spider_path = os.path.join(pwd, f'{self.name}.py')
-                item = {'task_name': spider_path, 'local_time': self.now_time()}
-                try:
-                    self.producer.send('is_real_run_test', json.dumps(item).encode('utf-8'))
-                    self.producer.flush()
-                    self.logger.info(f'检测到有新数据，任务已入队列, {item}')
-                except:
-                    self.logger.error('kafka生产者异常', exc_info=True)
-                break
-            elif self.monitor and now_time - self.start_run_time >= 3600:
-                self.logger.info('一小时未结束运行，检测到没有新数据')
-                self.send_start_info()
+            if ((now_time - self.last_time >= Waiting_time) and (len(self._queue) == 0)):
                 self.send_close_info()
-                break
-            elif ((now_time - self.last_time >= Waiting_time) and (
-                    len(self._queue) == 0)):
-                if self.Environmental_judgment() and not self.monitor:
-                    self.send_close_info()
                 try:
                     self.update(table='spiderlist_monitor', set_data={'is_run': 'no', 'end_time': self.now_time()},
                                 where=f"""`spider_name` = '{spider_name}'""")
@@ -211,6 +193,7 @@ class ManagerMemory(Basic, LoopGetter):
                 break
             self.rm_task()  # 清除已结束的线程
             time.sleep(Delay_time)
+        self.close_spider()
         self.finished_info(self.starttime, self.start_time)  # 完成时的日志打印
         os._exit(0)  # 暂时重新启用，待观察
 
@@ -303,12 +286,6 @@ class ManagerMemory(Basic, LoopGetter):
             if self.is_sameip:
                 meta['proxy'] = proxy
                 new_task['meta']['proxy'] = proxy
-        if self.is_proxy and proxy:
-            self.send_log(req_id=req_id, code='10', log_level='INFO', url=url, message='取代理成功',
-                          formdata=self.dic2params(params, data, json_params), show_url=meta.get('show_url'))
-        elif self.is_proxy and proxy == None:
-            self.send_log(req_id=req_id, code='11', log_level='WARN', url=url, message='取代理失败',
-                          formdata=self.dic2params(params, data, json_params), show_url=meta.get('show_url'))
         if isinstance(headers, dict):
             headers['User-Agent'] = await self.get_ua() if UA_PROXY else headers['User-Agent']
         return new_task, proxy, headers, meta
@@ -340,8 +317,6 @@ class ManagerMemory(Basic, LoopGetter):
             while retry_count < max_request:
                 new_task['proxy'] = proxy = proxy if not ignore_ip else None
                 try:
-                    self.send_log(req_id=req_id, code='01', log_level='INFO', url=url, message='即将发送请求',
-                                  formdata=self.dic2params(params, data, json_params), show_url=meta.get('show_url'))
                     response, res = await self.asyn_request(method, url, headers, timeout, cookies, is_encode,
                                                             params=params, data=data, json=json_params, proxy=proxy,
                                                             verify_ssl=verify_ssl, allow_redirects=allow_redirects)
@@ -525,11 +500,6 @@ class ManagerMemory(Basic, LoopGetter):
                     self.push(item=c)
         except Exception as e:
             self.exec_count += 1
-            self.send_log(req_id=response_last.log_info['req_id'], code='32', log_level='ERROR', url=response_last.url,
-                          message='爬虫逻辑报错',
-                          formdata=self.dic2params(response_last.log_info['params'], response_last.log_info['data'],
-                                                   response_last.log_info['json_params']),
-                          show_url=response_last.meta.get('show_url'))
             # if self.exec_count >= 100 and self.pages:
             #     import os
             #     self.finished_info(self.starttime, self.start_time, exec_info=True)  # 完成时的日志打印
@@ -545,15 +515,8 @@ class ManagerMemory(Basic, LoopGetter):
         if str(status) == '200':
             self.success_code_count += 1
             self.logger.debug(f'Catched from <{status} {url}>')
-            self.send_log(req_id=req_id, code='20', log_level='INFO', url=url, message='请求成功',
-                          formdata=self.dic2params(params, data, json_params), show_url=show_url)
-        if int(status) >= 400:
-            self.send_log(req_id=req_id, code='21', log_level='WARN', url=url, message='http状态码大于等于400',
-                          formdata=self.dic2params(params, data, json_params), show_url=show_url)
 
     async def retry(self, method, url, retry_count, abnormal, message, req_id, params, data, json_params, show_url):
         """重试日志函数"""
         self.logger.debug(f'Retrying <{method} {url}> (failed {retry_count} times): {abnormal+str(message)}')
-        self.send_log(req_id=req_id, code='25', log_level='WARN', url=url, message=f'第{retry_count}次重试请求',
-                      formdata=self.dic2params(params, data, json_params), show_url=show_url)
         self.wrong_count += 1

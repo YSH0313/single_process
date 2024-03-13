@@ -289,12 +289,6 @@ class Manager(Basic, LoopGetter):
             if self.is_sameip:
                 meta['proxy'] = proxy
                 new_body['meta']['proxy'] = proxy
-        if self.is_proxy and proxy:
-            self.send_log(req_id=req_id, code='10', log_level='INFO', url=url, message='取代理成功',
-                          formdata=self.dic2params(params, data, json_params), show_url=meta.get('show_url'))
-        elif self.is_proxy and proxy == None:
-            self.send_log(req_id=req_id, code='11', log_level='WARN', url=url, message='取代理失败',
-                          formdata=self.dic2params(params, data, json_params), show_url=meta.get('show_url'))
         if isinstance(headers, dict):
             headers['User-Agent'] = await self.get_ua() if UA_PROXY else headers['User-Agent']
         return new_body, proxy, headers, meta
@@ -329,8 +323,6 @@ class Manager(Basic, LoopGetter):
             while retry_count < max_request:
                 new_body['proxy'] = proxy = proxy if not ignore_ip else None
                 try:
-                    self.send_log(req_id=req_id, code='01', log_level='INFO', url=url, message='即将发送请求',
-                                  formdata=self.dic2params(params, data, json_params), show_url=meta.get('show_url'))
                     response, res = await self.asyn_request(method, url, headers, timeout, cookies, is_encode,
                                                             params=params, data=data, json=json_params, proxy=proxy,
                                                             verify_ssl=verify_ssl, allow_redirects=allow_redirects)
@@ -514,11 +506,6 @@ class Manager(Basic, LoopGetter):
                     self.send_message(message=c, is_thread=True)
         except Exception as e:
             self.exec_count += 1
-            self.send_log(req_id=response_last.log_info['req_id'], code='32', log_level='ERROR', url=response_last.url,
-                          message='爬虫逻辑报错',
-                          formdata=self.dic2params(response_last.log_info['params'], response_last.log_info['data'],
-                                                   response_last.log_info['json_params']),
-                          show_url=response_last.meta.get('show_url'))
             # if self.exec_count >= 100 and self.pages:
             #     import os
             #     self.finished_info(self.starttime, self.start_time, exec_info=True)  # 完成时的日志打印
@@ -534,15 +521,8 @@ class Manager(Basic, LoopGetter):
         if str(status) == '200':
             self.success_code_count += 1
             self.logger.debug(f'Catched from <{status} {url}>')
-            self.send_log(req_id=req_id, code='20', log_level='INFO', url=url, message='请求成功',
-                          formdata=self.dic2params(params, data, json_params), show_url=show_url)
-        if int(status) >= 400:
-            self.send_log(req_id=req_id, code='21', log_level='WARN', url=url, message='http状态码大于等于400',
-                          formdata=self.dic2params(params, data, json_params), show_url=show_url)
 
     async def retry(self, method, url, retry_count, abnormal, message, req_id, params, data, json_params, show_url):
         """重试日志函数"""
         self.logger.debug(f'Retrying <{method} {url}> (failed {retry_count} times): {abnormal+str(message)}')
-        self.send_log(req_id=req_id, code='25', log_level='WARN', url=url, message=f'第{retry_count}次重试请求',
-                      formdata=self.dic2params(params, data, json_params), show_url=show_url)
         self.wrong_count += 1
