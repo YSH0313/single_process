@@ -11,7 +11,30 @@ single_process是一款可以帮助你快速开发一个网络爬虫应用的一
     - 执行my_sh目录下的spiderlist_monitor.sql文件，用来生成爬虫注册表
 ### 安装说明
     - git clone https://github.com/YSH0313/single_process.git
+    - pip install -r requirements.txt
     - 将settings.py中的各项配置改为自己配置信息
+
+### 项目结构
+    ├── Jenkinsfile  # 用于分布式一件部署项目
+    ├── MQ  # Rabbitmq队列管理模块
+    ├── Production_spider.py  # 创建爬虫模板脚本
+    ├── README.md  # README.md
+    ├── __init__.py
+    ├── asyncio_config  # 核心引擎及请求类和返回体
+    ├── config  # 基础继承类及爬虫模版
+    ├── get_code  # 验证码训练模块
+    ├── items.py  # item模块用于定义字段
+    ├── js  # 常用js库
+    ├── library_tool  # 工具类
+    ├── middleware  # 中间件
+    ├── my_sh  # 自定义shell脚本
+    ├── requirements.txt  # 依赖
+    ├── run.py
+    ├── settings.py  # 配置文件
+    └── spider  # 任务目录
+        ├── __init__.py
+        └── first_spider.py  # 具体爬虫文件
+
 
 ### 测试运行
 - 执行spider文件夹下的first_spider.py，如果正常运行并打印出了相应的信息，说明部署成功
