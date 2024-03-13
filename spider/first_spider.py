@@ -3,33 +3,21 @@
 # @Date: 2020-02-23 09:56:50
 # @Version: 1.0.0
 # @Description: 测试爬虫文件
-import asyncio
-import base64
-import json
+
 import os
-import random
-import re
 import sys
-import time
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)).split('spider')[0])
 from config.all_config import *
-from string import Template
-import ddddocr
-from urllib.parse import quote
-import hmac
-from filestream_y.FileStream_y import stream_type
 
 
 class first_spider(ManagerMemory):
     name = 'first_spider'
     custom_settings = {
-        # 'retry_http_codes': [202, 412],
         'Waiting_time': 10,
         'IS_PROXY': False,
         'IS_SAMEIP': False,
         'UA_PROXY': False,
-        # 'X_MAX_PRIORITY': 15,
         'max_request': 1,
         # 'PREFETCH_COUNT': 50
     }
@@ -40,15 +28,13 @@ class first_spider(ManagerMemory):
         self.header = {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
         }
-        self.ddd = ddddocr.DdddOcr(show_ad=False)
-        # self.pages = True
 
     def start_requests(self):
         # for i in range(100):
-            url = 'https://www.baidu.com'
-            yield MyRequests(url=url, headers=self.header, callback=self.parse)
+        url = 'https://www.baidu.com'
+        yield MyRequests(url=url, headers=self.header, callback=self.parse)
 
-            # self.send_message(i)
+        # self.send_message(i)
 
     def parse(self, response):
         print('parse状态码：', response.status_code)
