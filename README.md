@@ -42,8 +42,8 @@ single_process是一款可以帮助你快速开发一个网络爬虫应用的一
 ### 创建爬虫
 - 1、打开Production_spider.py文件，根据里面的提示填写信息，完成后运行即可创建
 #### 示例：
-- `production("my_first", True, 5, "[开发者]", "第一个爬虫", "your_spider/my_first/")`
-- production具体参数请自行进入源码部分查看，每一项参数都有相应说明
+- `production("my_first", True, 5, "[开发者]", "第一个爬虫", "your_spider/my_first/", kernel=1)`
+- production具体参数请自行进入源码部分查看，每一项参数都有相应说明，上述示例中【kernel=1】为队列模式选项，默认为3表示优先使用内存作为优先级队列
 - 在spider目录下找到对应的爬虫文件进行相应的代码书写
 
 ### item配置
