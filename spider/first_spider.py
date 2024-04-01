@@ -30,9 +30,9 @@ class first_spider(ManagerMemory):
         }
 
     def start_requests(self):
-        # for i in range(100):
-        url = 'https://www.baidu.com'
-        yield MyRequests(url=url, headers=self.header, callback=self.parse)
+        for i in range(100):
+            url = 'https://www.baidu.com'
+            yield MyRequests(url=url, headers=self.header, callback=self.parse)
 
         # self.send_message(i)
 
