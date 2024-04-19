@@ -8,6 +8,8 @@ import os
 import ssl
 import sys
 
+import curl_cffi
+import httpx
 from requests.exceptions import ProxyError
 
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -28,6 +30,7 @@ from collections import Iterator
 from config.Basic import Basic
 from asyncio_config.my_Requests import MyResponse
 from concurrent.futures import wait, ALL_COMPLETED
+from curl_cffi.requests import AsyncSession
 from settings import PREFETCH_COUNT, TIME_OUT, IS_PROXY, IS_SAMEIP, Asynch, Waiting_time, Delay_time, \
     max_request, Agent_whitelist, retry_http_codes, UA_PROXY
 
@@ -105,21 +108,21 @@ class Manager(Basic, LoopGetter):
 
     def open_spider(self, spider_name: str):
         """开启spider第一步检查状态"""
-        data = self.select(table='spiderlist_monitor', columns=['owner', 'remarks'],
-                           where=f"""spider_name = '{spider_name}'""")
-        if data:
-            self.owner = self.per_json(data, '[0].owner')
-            self.source = self.per_json(data, '[0].remarks')
-        if data and self.operating_system == 'linux' and self.pages and len(sys.argv) > 1:
-            self.update(table='spiderlist_monitor', set_data={'is_run': 'yes', 'start_time': self.now_time()},
-                        where=f"""`spider_name` = '{spider_name}'""")
-            if not self.monitor:
-                self.send_start_info()
-        elif not data:
-            self.logger.info(
-                'If you need to turn on increment, please register and try to run again. If not, please ignore it')
-            self.logger.info(f'Crawler service startup for {spider_name}')
-        self.logger.info('Crawler program starts')
+        # data = self.select(table='spiderlist_monitor', columns=['owner', 'remarks'],
+        #                    where=f"""spider_name = '{spider_name}'""")
+        # if data:
+        #     self.owner = self.per_json(data, '[0].owner')
+        #     self.source = self.per_json(data, '[0].remarks')
+        # if data and self.operating_system == 'linux' and self.pages and len(sys.argv) > 1:
+        #     self.update(table='spiderlist_monitor', set_data={'is_run': 'yes', 'start_time': self.now_time()},
+        #                 where=f"""`spider_name` = '{spider_name}'""")
+        #     if not self.monitor:
+        #         self.send_start_info()
+        # elif not data:
+        #     self.logger.info(
+        #         'If you need to turn on increment, please register and try to run again. If not, please ignore it')
+        #     self.logger.info(f'Crawler service startup for {spider_name}')
+        # self.logger.info('Crawler program starts')
         return True
 
     def make_start_request(self, start_fun: {__name__}):
@@ -266,6 +269,8 @@ class Manager(Basic, LoopGetter):
         meta = param[0]
         proxy = param[1] if meta.get('proxy') else proxy
         ignore_ip = contents.get('ignore_ip')
+        is_httpx = contents.get('is_httpx')
+        is_TLS = contents.get('is_TLS')
         methods = 'POST' if contents.get('method') == 'POST' else 'GET'
         timeout = timeout if timeout else TIME_OUT
         asyncio.run_coroutine_threadsafe(
@@ -275,7 +280,8 @@ class Manager(Basic, LoopGetter):
                                encoding=encoding, meta=meta, level=level, proxy=proxy,
                                verify_ssl=verify_ssl, is_file=is_file, retry_count=retry_count,
                                is_change=is_change, allow_redirects=allow_redirects,
-                               ignore_ip=ignore_ip, request_info=body.decode('utf-8')), self.new_loop)
+                               ignore_ip=ignore_ip, is_httpx=is_httpx, is_TLS=is_TLS,
+                               request_info=body.decode('utf-8')), self.new_loop)
 
     async def request_preprocess(self, body, url, proxy, is_change, meta, req_id, params, data, json_params, headers):
         """请求预处理"""
@@ -293,22 +299,64 @@ class Manager(Basic, LoopGetter):
             headers['User-Agent'] = await self.get_ua() if UA_PROXY else headers['User-Agent']
         return new_body, proxy, headers, meta
 
-    async def asyn_request(self, method, url, headers, timeout, cookies, is_encode, **kwargs):
+    async def get_kwargs(self, is_httpx=False, is_TLS=False, **kwargs):
+        if is_httpx:
+            proxy = kwargs.get('proxy')
+            verify = kwargs.get('verify_ssl')
+            follow_redirects = kwargs.get('allow_redirects')
+            del kwargs['allow_redirects']
+            kwargs['proxy'] = {"all://": proxy} if proxy else None
+            kwargs['verify'] = verify
+            kwargs['follow_redirects'] = follow_redirects
+            return kwargs
+        elif is_TLS:
+            proxy = kwargs.get('proxy')
+            verify = kwargs.get('verify_ssl')
+            del kwargs['verify_ssl']
+            del kwargs['proxy']
+            ip = self.deal_re(re.search('//(.*)', proxy, re.S))
+            kwargs['proxies'] = {"https": ip, "http": ip} if ip else None
+            kwargs['verify'] = verify
+            return kwargs
+        return kwargs
+
+    async def asyn_request(self, method, url, headers, timeout, cookies, is_encode, is_httpx, is_TLS, **kwargs):
         """异步请求方法"""
-        with async_timeout.timeout(timeout=timeout):
-            async with aiohttp.ClientSession(headers=headers, conn_timeout=timeout, cookies=cookies) as session:
-                # async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False, limit=25),
-                #                                  trust_env=True, headers=headers, conn_timeout=timeout,
-                #                                  cookies=cookies) as session:
-                async with session.request(method=method, url=URL(url, encoded=True) if is_encode else url, **kwargs) as response:
-                    res = await response.read()
-                    return response, res
+        kwargs = await self.get_kwargs(is_httpx, is_TLS, **kwargs)
+        if is_httpx:
+            proxy = kwargs.get('proxy')
+            verify = kwargs.get('verify')
+            follow_redirects = kwargs.get('follow_redirects')
+            del kwargs['proxy']
+            with async_timeout.timeout(timeout=timeout):
+                async with httpx.AsyncClient(http2=True, proxies=proxy, verify=verify) as client:
+                    response = await client.request(method=method, url=URL(url, encoded=True) if is_encode else url,
+                                                    follow_redirects=follow_redirects, **kwargs)
+                    res = response.content
+                    return response, res, response.status_code
+        elif is_TLS:
+            verify = kwargs.get('verify')
+            with async_timeout.timeout(timeout=timeout):
+                async with AsyncSession(verify=verify) as session:
+                    response = await session.request(method=method, url=URL(url, encoded=True) if is_encode else url,
+                                                     **kwargs)
+                    res = response.content
+                    return response, res, response.status_code
+        else:
+            with async_timeout.timeout(timeout=timeout):
+                async with aiohttp.ClientSession(headers=headers, conn_timeout=timeout, cookies=cookies) as session:
+                    # async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False, limit=25),
+                    #                                  trust_env=True, headers=headers, conn_timeout=timeout,
+                    #                                  cookies=cookies) as session:
+                    async with session.request(method=method, url=URL(url, encoded=True) if is_encode else url, **kwargs) as response:
+                        res = await response.read()
+                        return response, res, response.status
 
     async def make_Requests(self, method='GET', url=None, body=None, headers=None, params=None, data=None,
                             json_params=None, cookies=None, timeout=None, callback=None, dont_filter=False,
                             encoding=None, meta=None, level=0, request_info=None, proxy=None, verify_ssl=None,
                             allow_redirects=True, is_file=False, retry_count=0, is_change=False, is_encode=None,
-                            ignore_ip=False):
+                            ignore_ip=False, is_httpx=False, is_TLS=False):
         """请求处理函数"""
         req_id = self.get_inttime()
         try:
@@ -323,11 +371,13 @@ class Manager(Basic, LoopGetter):
             while retry_count < max_request:
                 new_body['proxy'] = proxy = proxy if not ignore_ip else None
                 try:
-                    response, res = await self.asyn_request(method, url, headers, timeout, cookies, is_encode,
-                                                            params=params, data=data, json=json_params, proxy=proxy,
-                                                            verify_ssl=verify_ssl, allow_redirects=allow_redirects)
+                    response, res, status_code = await self.asyn_request(method, url, headers, timeout, cookies,
+                                                                         is_encode, is_httpx, is_TLS, params=params,
+                                                                         data=data, json=json_params, proxy=proxy,
+                                                                         verify_ssl=verify_ssl,
+                                                                         allow_redirects=allow_redirects)
                     # 打印日志
-                    await self.infos(response.status, method, url, req_id, params, data, json_params, meta.get('show_url'))
+                    await self.infos(status_code, method, url, req_id, params, data, json_params, meta.get('show_url'))
 
                     text = await self.deal_code(res=res, body=body, is_file=is_file, encoding=encoding)
 
@@ -335,7 +385,7 @@ class Manager(Basic, LoopGetter):
                         raise ProxyError(f'{proxy}代理并发数超限制')
                     response_last = MyResponse(url=url, headers=response.headers, data=data, cookies=response.cookies,
                                                meta=meta, retry_count=retry_count, text=text, content=res,
-                                               status_code=response.status, request_info=request_info, proxy=proxy,
+                                               status_code=status_code, request_info=request_info, proxy=proxy,
                                                level=level, log_info={'req_id': req_id, 'params': params, 'data': data,
                                                                       'json_params': json_params})
                     await self.Iterative_processing(method=method, callback=callback,
@@ -345,7 +395,7 @@ class Manager(Basic, LoopGetter):
                 except (aiohttp.ClientProxyConnectionError, aiohttp.ServerTimeoutError, TimeoutError,
                         concurrent.futures._base.TimeoutError, aiohttp.ClientHttpProxyError,
                         aiohttp.ServerDisconnectedError, aiohttp.ClientConnectorError, aiohttp.ClientOSError,
-                        aiohttp.ClientPayloadError) as e:
+                        aiohttp.ClientPayloadError, curl_cffi.requests.errors.RequestsError) as e:
                     retry_count += 1
                     await self.retry(method, url, retry_count, repr(e), new_body, req_id, params, data, json_params,
                                      meta.get('show_url'))

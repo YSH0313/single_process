@@ -5,8 +5,9 @@ import sys
 class MyRequests(object):
     def __init__(self, url, method='GET', headers=None, params=None, data=None, json_params=None, cookies=None,
                  timeout=30, callback=None, proxy=None, level=0, verify_ssl=None, allow_redirects=True, is_file=False,
-                 retry_count=0, is_change=False, is_encode=None, ignore_ip=False, is_websource=False, page_click=None,
-                 before_do=None, input_box=None, input_text=None, input_click=None, dont_filter=False, encoding=None, **meta):
+                 retry_count=0, is_change=False, is_encode=None, ignore_ip=False, is_httpx=False, is_TLS=False,
+                 is_websource=False, page_click=None, before_do=None, input_box=None, input_text=None, input_click=None,
+                 dont_filter=False, encoding=None, **meta):
         self.method = method  # 请求类型
         self.url = url  # 目标url
         self.params = params  # 使用get方式进行post请求时的参数
@@ -26,6 +27,8 @@ class MyRequests(object):
         self.is_change = is_change
         self.is_encode = is_encode
         self.ignore_ip = ignore_ip
+        self.is_httpx = is_httpx
+        self.is_TLS = is_TLS
         self.is_websource = is_websource  # 页面中出现匹配的内容或元素时结束渲染（推荐使用xpath）
         self.page_click = page_click  # 翻页需要点击的按钮位置（xpath路径）
         self.before_do = before_do  # 翻页前需要做的点击操作（xpath路径）
@@ -39,7 +42,8 @@ class MyRequests(object):
 class MyFormRequests(object):
     def __init__(self, url, method='POST', headers=None, params=None, data=None, json_params=None, cookies=None,
                  timeout=30, callback=None, proxy=None, level=0, verify_ssl=None, allow_redirects=True, is_file=False,
-                 retry_count=0, is_change=False, is_encode=None, ignore_ip=False, dont_filter=False, encoding=None, **meta):
+                 is_httpx=False, is_TLS=False, retry_count=0, is_change=False, is_encode=None, ignore_ip=False,
+                 dont_filter=False, encoding=None, **meta):
         self.method = method  # 请求类型
         self.url = url  # 目标url
         self.params = params  # 目标url
@@ -59,6 +63,8 @@ class MyFormRequests(object):
         self.is_change = is_change
         self.is_encode = is_encode
         self.ignore_ip = ignore_ip
+        self.is_httpx = is_httpx
+        self.is_TLS = is_TLS
         self.dont_filter = dont_filter  # 是否对当前url进行去重访问
         self.encoding = encoding  # 编码格式
 
@@ -66,7 +72,8 @@ class MyFormRequests(object):
 class MyPatchRequests(object):
     def __init__(self, url, method='PATCH', headers=None, params=None, data=None, json_params=None, cookies=None,
                  timeout=30, callback=None, proxy=None, level=0, verify_ssl=None, allow_redirects=True, is_file=False,
-                 retry_count=0, is_change=False, is_encode=None, ignore_ip=False, dont_filter=False, encoding=None, **meta):
+                 retry_count=0, is_change=False, is_encode=None, ignore_ip=False, is_https=False, is_TLS=False,
+                 dont_filter=False, encoding=None, **meta):
         self.method = method  # 请求类型
         self.url = url  # 目标url
         self.params = params  # 目标url
