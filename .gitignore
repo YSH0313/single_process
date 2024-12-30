@@ -7,8 +7,6 @@
 *.pid
 *.out
 *.html
-test.py
 *.jpg
 *.xml
-settings.py
-Production_spider.py
+.DS_Store
